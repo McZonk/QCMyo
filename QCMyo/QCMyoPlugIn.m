@@ -355,6 +355,22 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 				self.trained = @NO;
 				self.connected = @NO;
 				self.paired = @NO;
+				
+				self.orientationX = @0.0;
+				self.orientationY = @0.0;
+				self.orientationZ = @0.0;
+				self.orientationW = @0.0;
+
+				self.accelerometerX = @0.0;
+				self.accelerometerY = @0.0;
+				self.accelerometerZ = @0.0;
+				
+				self.gyroscopeX = @0.0;
+				self.gyroscopeY = @0.0;
+				self.gyroscopeZ = @0.0;
+
+				self.pose = @(libmyo_pose_rest);
+				
 				break;
 			}
 			
