@@ -59,8 +59,16 @@
 {
 	return @{
 		QCPlugInAttributeNameKey: @"Myo",
-		QCPlugInAttributeDescriptionKey: @"Gesture detection and acceleration handling for Myo.",
-		QCPlugInAttributeCopyrightKey: @"© 2013 Boinx Software Ltd."
+		QCPlugInAttributeDescriptionKey: @"Gesture detection and orientation handling for Myo.",
+		QCPlugInAttributeCopyrightKey: @"© 2014 mczonk.de",
+		QCPlugInAttributeCategoriesKey: @[
+			@"Source",
+			@"Source/Device",
+		],
+		QCPlugInAttributeExamplesKey: @[
+			[NSURL URLWithString:@"http://thalmiclabs.com/"],
+			[NSURL URLWithString:@"https://github.com/McZonk/QCMyo/"],
+		],
 	};
 }
 
