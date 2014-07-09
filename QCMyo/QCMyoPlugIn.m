@@ -20,6 +20,14 @@
 @property (nonatomic, strong) NSNumber *orientationZ;
 @property (nonatomic, strong) NSNumber *orientationW;
 
+@property (nonatomic, strong) NSNumber *accelerometerX;
+@property (nonatomic, strong) NSNumber *accelerometerY;
+@property (nonatomic, strong) NSNumber *accelerometerZ;
+
+@property (nonatomic, strong) NSNumber *gyroscopeX;
+@property (nonatomic, strong) NSNumber *gyroscopeY;
+@property (nonatomic, strong) NSNumber *gyroscopeZ;
+
 @property (nonatomic, strong) NSNumber *pose;
 
 @end
@@ -37,6 +45,15 @@
 @dynamic outputOrientationY;
 @dynamic outputOrientationZ;
 @dynamic outputOrientationW;
+
+@dynamic outputAccelerometerX;
+@dynamic outputAccelerometerY;
+@dynamic outputAccelerometerZ;
+
+@dynamic outputGyroscopeX;
+@dynamic outputGyroscopeY;
+@dynamic outputGyroscopeZ;
+
 
 + (NSDictionary *)attributes
 {
@@ -71,6 +88,55 @@
 		return @{ QCPortAttributeNameKey: @"Trained" };
 	}
 	
+	// orientation
+	
+	if([key isEqualToString:@"outputOrientationX"])
+	{
+		return @{ QCPortAttributeNameKey: @"Orientation X" };
+	}
+	if([key isEqualToString:@"outputOrientationY"])
+	{
+		return @{ QCPortAttributeNameKey: @"Orientation Y" };
+	}
+	if([key isEqualToString:@"outputOrientationZ"])
+	{
+		return @{ QCPortAttributeNameKey: @"Orientation Z" };
+	}
+	if([key isEqualToString:@"outputOrientationW"])
+	{
+		return @{ QCPortAttributeNameKey: @"Orientation W" };
+	}
+	
+	// accelerometer
+	
+	if([key isEqualToString:@"outputAccelerometerX"])
+	{
+		return @{ QCPortAttributeNameKey: @"Accelerometer X" };
+	}
+	if([key isEqualToString:@"outputAccelerometerY"])
+	{
+		return @{ QCPortAttributeNameKey: @"Accelerometer Y" };
+	}
+	if([key isEqualToString:@"outputAccelerometerZ"])
+	{
+		return @{ QCPortAttributeNameKey: @"Accelerometer Z" };
+	}
+	
+	// gyroscpe
+	
+	if([key isEqualToString:@"outputGyroscopeX"])
+	{
+		return @{ QCPortAttributeNameKey: @"Gyroscope X" };
+	}
+	if([key isEqualToString:@"outputGyroscopeY"])
+	{
+		return @{ QCPortAttributeNameKey: @"Gyroscope Y" };
+	}
+	if([key isEqualToString:@"outputGyroscopeZ"])
+	{
+		return @{ QCPortAttributeNameKey: @"Gyroscope Z" };
+	}
+	
 	// pose
 	
 	if([key isEqualToString:@"outputPose"])
@@ -89,25 +155,6 @@
 				@"Twist In"
 			],
 		};
-	}
-	
-	// orientation
-	
-	if([key isEqualToString:@"outputOrientationX"])
-	{
-		return @{ QCPortAttributeNameKey: @"Orientation X" };
-	}
-	if([key isEqualToString:@"outputOrientationY"])
-	{
-		return @{ QCPortAttributeNameKey: @"Orientation Y" };
-	}
-	if([key isEqualToString:@"outputOrientationZ"])
-	{
-		return @{ QCPortAttributeNameKey: @"Orientation Z" };
-	}
-	if([key isEqualToString:@"outputOrientationW"])
-	{
-		return @{ QCPortAttributeNameKey: @"Orientation W" };
 	}
 
 	return nil;
@@ -175,6 +222,12 @@
 		self.outputConnected = connected.boolValue;
 		self.connected = nil;
 	}
+	NSNumber *trained = self.trained;
+	if(trained != nil)
+	{
+		self.outputTrained = trained.boolValue;
+		self.trained = nil;
+	}
 	
 	// orientation
 	
@@ -201,6 +254,48 @@
 	{
 		self.outputOrientationW = orientationW.doubleValue;
 		self.orientationW = nil;
+	}
+	
+	// accelerometer
+	
+	NSNumber *accelerometerX = self.accelerometerX;
+	if(accelerometerX != nil)
+	{
+		self.outputAccelerometerX = accelerometerX.doubleValue;
+		self.accelerometerX = nil;
+	}
+	NSNumber *accelerometerY = self.accelerometerY;
+	if(accelerometerY != nil)
+	{
+		self.outputAccelerometerY = accelerometerY.doubleValue;
+		self.accelerometerY = nil;
+	}
+	NSNumber *accelerometerZ = self.accelerometerZ;
+	if(accelerometerZ != nil)
+	{
+		self.outputAccelerometerZ = accelerometerZ.doubleValue;
+		self.accelerometerZ = nil;
+	}
+	
+	// gyroscope
+	
+	NSNumber *gyroscopeX = self.gyroscopeX;
+	if(gyroscopeX != nil)
+	{
+		self.outputGyroscopeX = gyroscopeX.doubleValue;
+		self.gyroscopeX = nil;
+	}
+	NSNumber *gyroscopeY = self.gyroscopeY;
+	if(gyroscopeY != nil)
+	{
+		self.outputGyroscopeY = gyroscopeY.doubleValue;
+		self.gyroscopeY = nil;
+	}
+	NSNumber *gyroscopeZ = self.gyroscopeZ;
+	if(gyroscopeZ != nil)
+	{
+		self.outputGyroscopeZ = gyroscopeZ.doubleValue;
+		self.gyroscopeZ = nil;
 	}
 	
 	// pose
@@ -231,7 +326,8 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 {
 	dispatch_sync(queue, ^{
 		libmyo_event_type_t type = libmyo_event_get_type(event);
-
+		libmyo_myo_t myo = libmyo_event_get_myo(event);
+		
 		[outputValueLock lock];
 
 		switch(type)
@@ -245,11 +341,18 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 			case libmyo_event_connected:
 			{
 				self.connected = @YES;
+				
+				libmyo_result_t result = libmyo_training_load_profile(myo, NULL, NULL);
+				if(result == libmyo_success)
+				{
+					self.trained = @YES;
+				}
 				break;
 			}
 			
 			case libmyo_event_disconnected:
 			{
+				self.trained = @NO;
 				self.connected = @NO;
 				self.paired = @NO;
 				break;
@@ -261,13 +364,28 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 				self.orientationY = @(libmyo_event_get_orientation(event, libmyo_orientation_y));
 				self.orientationZ = @(libmyo_event_get_orientation(event, libmyo_orientation_z));
 				self.orientationW = @(libmyo_event_get_orientation(event, libmyo_orientation_w));
+				
+				self.accelerometerX = @(libmyo_event_get_accelerometer(event, 0));
+				self.accelerometerY = @(libmyo_event_get_accelerometer(event, 1));
+				self.accelerometerZ = @(libmyo_event_get_accelerometer(event, 2));
+
+				self.gyroscopeX = @(libmyo_event_get_gyroscope(event, 0));
+				self.gyroscopeY = @(libmyo_event_get_gyroscope(event, 1));
+				self.gyroscopeZ = @(libmyo_event_get_gyroscope(event, 2));
+
 				break;
 			}
 				
 			case libmyo_event_pose:
 			{
 				self.pose = @(libmyo_event_get_pose(event));
-				NSLog(@"POSE: %@", self.pose);
+
+				/*
+				if(self.pose.unsignedIntegerValue > 0 && self.pose.unsignedIntegerValue < libmyo_num_poses)
+				{
+					libmyo_vibrate(myo, libmyo_vibration_medium, NULL);
+				}
+				*/
 			}
 				
 			default:
