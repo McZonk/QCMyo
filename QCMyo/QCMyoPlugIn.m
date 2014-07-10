@@ -435,6 +435,8 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 			case libmyo_event_pose:
 			{
 				self.pose = @(libmyo_event_get_pose(event));
+				
+				break;
 			}
 				
 			default:
