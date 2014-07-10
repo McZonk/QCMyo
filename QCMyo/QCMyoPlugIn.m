@@ -69,7 +69,7 @@
 			@"Source/Device",
 		],
 		QCPlugInAttributeExamplesKey: @[
-			[NSURL URLWithString:@"http://thalmiclabs.com/"],
+			[NSURL URLWithString:@"http://developer.thalmic.com/"],
 			[NSURL URLWithString:@"https://github.com/McZonk/QCMyo/"],
 		],
 	};
