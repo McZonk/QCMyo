@@ -21,12 +21,14 @@ typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
 }
 
 @property (nonatomic, assign) QCMyoPlugInPairingMode pairingMode;
+@property (nonatomic, copy) NSString *paringMacAddress;
 
-@property (nonatomic, strong) NSString *trainingFilename;
+@property (nonatomic, copy) NSString *trainingFilename;
 
 @property (nonatomic, strong) NSNumber *paired;
 @property (nonatomic, strong) NSNumber *connected;
 @property (nonatomic, strong) NSNumber *trained;
+@property (nonatomic, strong) NSString *macAddress;
 
 @property (nonatomic, strong) NSNumber *orientationX;
 @property (nonatomic, strong) NSNumber *orientationY;
@@ -59,6 +61,7 @@ typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
 @dynamic outputPaired;
 @dynamic outputConnected;
 @dynamic outputTrained;
+@dynamic outputMacAddress;
 
 @dynamic outputOrientationX;
 @dynamic outputOrientationY;
@@ -150,6 +153,10 @@ typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
 	if([key isEqualToString:@"outputTrained"])
 	{
 		return @{ QCPortAttributeNameKey: @"Trained" };
+	}
+	if([key isEqualToString:@"outputMacAddress"])
+	{
+		return @{ QCPortAttributeNameKey: @"Mac Address" };
 	}
 	
 	// orientation
@@ -272,11 +279,14 @@ typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
 {
 	[outputValueLock lock];
 	
+	if([self didValueForInputKeyChange:@"inputPairingMacAddress"])
+	{
+		self.paringMacAddress = self.inputPairingMacAddress;
+	}
+	
 	if([self didValueForInputKeyChange:@"inputPairingMode"])
 	{
 		self.pairingMode = self.inputPairingMode;
-		
-		NSLog(@"pairing mode: %lu", self.pairingMode);
 		
 		[self pair];
 	}
@@ -325,6 +335,12 @@ typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
 	{
 		self.outputTrained = trained.boolValue;
 		self.trained = nil;
+	}
+	NSString *macAddress = self.macAddress;
+	if(macAddress != nil)
+	{
+		self.outputMacAddress = macAddress;
+		self.macAddress = nil;
 	}
 	
 	// orientation
@@ -434,6 +450,13 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 				myo = libmyo_event_get_myo(event);
 				
 				self.paired = @YES;
+				
+				{
+					uint64_t macAddress = libmyo_get_mac_address(myo);
+					libmyo_string_t macAddressString = libmyo_mac_address_to_string(macAddress);
+					self.macAddress = [NSString stringWithUTF8String:libmyo_string_c_str(macAddressString)];
+					libmyo_string_free(macAddressString), macAddressString = NULL;
+				}
 				break;
 			}
 			
@@ -565,9 +588,6 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 		if(myo == NULL)
 		{
 			[outputValueLock lock];
-
-			libmyo_error_details_t error = NULL;
-			libmyo_result_t result = libmyo_success;
 			
 			switch(self.pairingMode)
 			{
@@ -578,7 +598,8 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 					
 				case QCMyoPlugInPairingModeAny:
 				{
-					result = libmyo_pair_any(hub, 1, &error);
+					libmyo_error_details_t error = NULL;
+					libmyo_result_t result = libmyo_pair_any(hub, 1, &error);
 					if(result != libmyo_success)
 					{
 						NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
@@ -589,7 +610,8 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 					
 				case QCMyoPlugInPairingModeAdjacent:
 				{
-					result = libmyo_pair_adjacent(hub, 1, &error);
+					libmyo_error_details_t error = NULL;
+					libmyo_result_t result = libmyo_pair_adjacent(hub, 1, &error);
 					if(result != libmyo_success)
 					{
 						NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
@@ -600,7 +622,16 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 					
 				case QCMyoPlugInPairingModeMacAddress:
 				{
-					// TODO: handle
+					uint64 macAddress = libmyo_string_to_mac_address(self.paringMacAddress.UTF8String);
+					
+					libmyo_error_details_t error = NULL;
+					libmyo_result_t result = libmyo_pair_by_mac_address(hub, macAddress, &error);
+					if(result != libmyo_success)
+					{
+						NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
+						libmyo_free_error_details(error), error = NULL;
+					}
+					break;
 				}
 			}
 			

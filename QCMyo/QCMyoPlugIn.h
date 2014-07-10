@@ -13,6 +13,8 @@
 @property (assign) BOOL outputConnected;
 @property (assign) BOOL outputTrained;
 
+@property (strong) NSString *outputMacAddress;
+
 @property (assign) double outputOrientationX;
 @property (assign) double outputOrientationY;
 @property (assign) double outputOrientationZ;
