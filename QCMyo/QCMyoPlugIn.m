@@ -8,6 +8,7 @@
 	libmyo_hub_t hub;
 	libmyo_myo_t myo;
 	dispatch_queue_t queue;
+	dispatch_group_t group;
 	
 	NSLock *outputValueLock;
 }
@@ -37,6 +38,7 @@
 @implementation QCMyoPlugIn
 
 @dynamic inputVibration;
+@dynamic inputTrainingFilename;
 
 @dynamic outputPaired;
 @dynamic outputConnected;
@@ -77,6 +79,12 @@
 
 + (NSDictionary *)attributesForPropertyPortWithKey:(NSString *)key
 {
+	
+	if([key isEqualToString:@"inputTrainingFilename"])
+	{
+		return @{ QCPortAttributeNameKey: @"Training Filename" };
+	}
+	
 	if([key isEqualToString:@"inputVibration"])
 	{
 		return @{
@@ -226,9 +234,17 @@
 
 - (BOOL)execute:(id<QCPlugInContext>)context atTime:(NSTimeInterval)time withArguments:(NSDictionary *)arguments
 {
+	[outputValueLock lock];
+
+	if([self didValueForInputKeyChange:@"inputTrainingFilename"])
+	{
+		self.trainingFilename = self.inputTrainingFilename;
+		
+		[self loadTraining];
+	}
+	
 	if([self didValueForInputKeyChange:@"inputVibration"])
 	{
-		NSLog(@"%ld", self.inputVibration);
 		switch(self.inputVibration)
 		{
 			case 1:
@@ -244,8 +260,6 @@
 				break;
 		}
 	}
-	
-	[outputValueLock lock];
 	
 	// status
 	
@@ -381,12 +395,8 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 			case libmyo_event_connected:
 			{
 				self.connected = @YES;
-				
-				libmyo_result_t result = libmyo_training_load_profile(myo, NULL, NULL);
-				if(result == libmyo_success)
-				{
-					self.trained = @YES;
-				}
+
+				[self loadTraining];
 				break;
 			}
 			
@@ -501,6 +511,36 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 			{
 				NSLog(@"%s:%d", __FUNCTION__, result);
 			}
+		}
+	});
+}
+
+- (void)loadTraining
+{
+	dispatch_async(queue, ^{
+		if(myo != NULL)
+		{
+			[outputValueLock lock];
+			
+			NSString *trainingFilename = self.trainingFilename;
+			if(trainingFilename.length == 0)
+			{
+				trainingFilename = nil;
+			}
+			
+			libmyo_error_details_t error = NULL;
+			libmyo_result_t result = libmyo_training_load_profile(myo, trainingFilename.UTF8String, &error);
+			if(result != libmyo_success)
+			{
+				NSLog(@"%s:%d", __FUNCTION__, result);
+				self.trained = @NO;
+			}
+			else
+			{
+				self.trained = @YES;
+			}
+			
+			[outputValueLock unlock];
 		}
 	});
 }

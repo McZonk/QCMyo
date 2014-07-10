@@ -3,6 +3,7 @@
 
 @interface QCMyoPlugIn : QCPlugIn
 
+@property (strong) NSString *inputTrainingFilename;
 @property (assign) NSUInteger inputVibration;
 
 @property (assign) BOOL outputPaired;
