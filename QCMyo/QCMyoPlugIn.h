@@ -3,6 +3,9 @@
 
 @interface QCMyoPlugIn : QCPlugIn
 
+@property (assign) NSUInteger inputPairingMode;
+@property (strong) NSString *inputPairingMacAddress;
+
 @property (strong) NSString *inputTrainingFilename;
 @property (assign) NSUInteger inputVibration;
 

@@ -2,16 +2,25 @@
 
 #import <myo/libmyo.h>
 
+typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
+{
+	QCMyoPlugInPairingModeNone,
+	QCMyoPlugInPairingModeAny,
+	QCMyoPlugInPairingModeAdjacent,
+	QCMyoPlugInPairingModeMacAddress,
+};
+
 
 @interface QCMyoPlugIn ()
 {
 	libmyo_hub_t hub;
 	libmyo_myo_t myo;
 	dispatch_queue_t queue;
-	dispatch_group_t group;
 	
 	NSLock *outputValueLock;
 }
+
+@property (nonatomic, assign) QCMyoPlugInPairingMode pairingMode;
 
 @property (nonatomic, strong) NSString *trainingFilename;
 
@@ -35,12 +44,14 @@
 @property (nonatomic, strong) NSNumber *pose;
 
 @property (assign) BOOL stopRunning;
-@property (assign) BOOL stoppedRunning;
 
 @end
 
 
 @implementation QCMyoPlugIn
+
+@dynamic inputPairingMode;
+@dynamic inputPairingMacAddress;
 
 @dynamic inputVibration;
 @dynamic inputTrainingFilename;
@@ -84,6 +95,26 @@
 
 + (NSDictionary *)attributesForPropertyPortWithKey:(NSString *)key
 {
+	if([key isEqualToString:@"inputPairingMode"])
+	{
+		return @{
+			QCPortAttributeNameKey: @"Paring Mode",
+			QCPortAttributeTypeKey: QCPortTypeIndex,
+			QCPortAttributeMinimumValueKey: @0,
+			QCPortAttributeMaximumValueKey: @3,
+			QCPortAttributeMenuItemsKey: @[
+				@"None",
+				@"Any",
+				@"Adjacent",
+				@"Mac Address",
+			],
+		};
+	}
+	
+	if([key isEqualToString:@"inputPairingMacAddress"])
+	{
+		return @{ QCPortAttributeNameKey: @"Pairing Mac Address" };
+	}
 	
 	if([key isEqualToString:@"inputTrainingFilename"])
 	{
@@ -209,7 +240,6 @@
 	if(self != nil)
 	{
 		queue = dispatch_queue_create("Myo", DISPATCH_QUEUE_SERIAL);
-		group = dispatch_group_create();
 		
 		outputValueLock = [[NSLock alloc] init];
 	}
@@ -235,12 +265,21 @@
 
 - (void)disableExecution:(id <QCPlugInContext>)context
 {
-	// Called by Quartz Composer when the plug-in instance stops being used by Quartz Composer.
+
 }
 
 - (BOOL)execute:(id<QCPlugInContext>)context atTime:(NSTimeInterval)time withArguments:(NSDictionary *)arguments
 {
 	[outputValueLock lock];
+	
+	if([self didValueForInputKeyChange:@"inputPairingMode"])
+	{
+		self.pairingMode = self.inputPairingMode;
+		
+		NSLog(@"pairing mode: %lu", self.pairingMode);
+		
+		[self pair];
+	}
 
 	if([self didValueForInputKeyChange:@"inputTrainingFilename"])
 	{
@@ -461,7 +500,6 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 		}
 
 		[outputValueLock unlock];
-
 	});
 }
 
@@ -473,16 +511,8 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 		libmyo_result_t result = libmyo_init_hub(&hub, &error);
 		if(result != libmyo_success)
 		{
-			NSLog(@"%s:%d:%d", __FUNCTION__, __LINE__, result);
-			success = NO;
-			return;
-		}
-		
-		result = libmyo_pair_any(hub, 1, &error);
-		if(result != libmyo_success)
-		{
-			NSLog(@"%s:%d:%d", __FUNCTION__, __LINE__, result);
-			success = NO;
+			NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
+			libmyo_free_error_details(error), error = NULL;
 			return;
 		}
 		
@@ -493,13 +523,29 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 				libmyo_result_t result = libmyo_run(hub, 20, MyoHandler, (__bridge void *)self, &error);
 				if(result != libmyo_success)
 				{
-					break;
+					NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
+					libmyo_free_error_details(error), error = NULL;
 				}
 			}
 			
-			self.stopRunning = NO;
-			
-			dispatch_group_leave(group);
+			dispatch_async(queue, ^{
+				myo = NULL;
+				
+				if(hub != NULL)
+				{
+					libmyo_error_details_t error = NULL;
+					libmyo_result_t result = libmyo_shutdown_hub(hub, &error);
+					if(result != libmyo_success)
+					{
+						NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
+						libmyo_free_error_details(error), error = NULL;
+					}
+				
+					hub = NULL;
+				}
+
+				self.stopRunning = NO;
+			});
 		});
 		
 		success = YES;
@@ -510,23 +556,55 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 
 - (void)shutdownHub
 {
-	dispatch_sync(queue, ^{
-		myo = NULL;
-		
-		if(hub != NULL)
-		{
-			dispatch_group_enter(group);
+	self.stopRunning = YES;
+}
 
-			self.stopRunning = YES;
-			
-			dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
-			
+- (void)pair
+{
+	dispatch_async(queue, ^{
+		if(myo == NULL)
+		{
+			[outputValueLock lock];
+
 			libmyo_error_details_t error = NULL;
-			libmyo_result_t result = libmyo_shutdown_hub(hub, &error);
-			if(result != libmyo_success)
+			libmyo_result_t result = libmyo_success;
+			
+			switch(self.pairingMode)
 			{
-				NSLog(@"%s:%d", __FUNCTION__, result);
+				case QCMyoPlugInPairingModeNone:
+				{
+					break;
+				}
+					
+				case QCMyoPlugInPairingModeAny:
+				{
+					result = libmyo_pair_any(hub, 1, &error);
+					if(result != libmyo_success)
+					{
+						NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
+						libmyo_free_error_details(error), error = NULL;
+					}
+					break;
+				}
+					
+				case QCMyoPlugInPairingModeAdjacent:
+				{
+					result = libmyo_pair_adjacent(hub, 1, &error);
+					if(result != libmyo_success)
+					{
+						NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
+						libmyo_free_error_details(error), error = NULL;
+					}
+					break;
+				}
+					
+				case QCMyoPlugInPairingModeMacAddress:
+				{
+					// TODO: handle
+				}
 			}
+			
+			[outputValueLock unlock];
 		}
 	});
 }
@@ -548,7 +626,8 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 			libmyo_result_t result = libmyo_training_load_profile(myo, trainingFilename.UTF8String, &error);
 			if(result != libmyo_success)
 			{
-				NSLog(@"%s:%d", __FUNCTION__, result);
+				NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
+				libmyo_free_error_details(error), error = NULL;
 				self.trained = @NO;
 			}
 			else
@@ -570,7 +649,8 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 			libmyo_result_t result = libmyo_vibrate(myo, vibration, &error);
 			if(result != libmyo_success)
 			{
-				NSLog(@"%s:%d", __FUNCTION__, result);
+				NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
+				libmyo_free_error_details(error), error = NULL;
 			}
 		}
 	});
