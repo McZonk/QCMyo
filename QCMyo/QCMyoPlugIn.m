@@ -623,13 +623,15 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 				case QCMyoPlugInPairingModeMacAddress:
 				{
 					uint64 macAddress = libmyo_string_to_mac_address(self.paringMacAddress.UTF8String);
-					
-					libmyo_error_details_t error = NULL;
-					libmyo_result_t result = libmyo_pair_by_mac_address(hub, macAddress, &error);
-					if(result != libmyo_success)
+					if(macAddress != 0)
 					{
-						NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
-						libmyo_free_error_details(error), error = NULL;
+						libmyo_error_details_t error = NULL;
+						libmyo_result_t result = libmyo_pair_by_mac_address(hub, macAddress, &error);
+						if(result != libmyo_success)
+						{
+							NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
+							libmyo_free_error_details(error), error = NULL;
+						}
 					}
 					break;
 				}
