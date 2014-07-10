@@ -6,6 +6,7 @@
 @interface QCMyoPlugIn ()
 {
 	libmyo_hub_t hub;
+	libmyo_myo_t myo;
 	dispatch_queue_t queue;
 	
 	NSLock *outputValueLock;
@@ -35,11 +36,11 @@
 
 @implementation QCMyoPlugIn
 
+@dynamic inputVibration;
+
 @dynamic outputPaired;
 @dynamic outputConnected;
 @dynamic outputTrained;
-
-@dynamic outputPose;
 
 @dynamic outputOrientationX;
 @dynamic outputOrientationY;
@@ -53,6 +54,8 @@
 @dynamic outputGyroscopeX;
 @dynamic outputGyroscopeY;
 @dynamic outputGyroscopeZ;
+
+@dynamic outputPose;
 
 
 + (NSDictionary *)attributes
@@ -74,10 +77,19 @@
 
 + (NSDictionary *)attributesForPropertyPortWithKey:(NSString *)key
 {
-	if([key isEqualToString:@"inputMacAddress"])
+	if([key isEqualToString:@"inputVibration"])
 	{
 		return @{
-			QCPortAttributeNameKey: @"Mac Address",
+			QCPortAttributeNameKey: @"Vibration",
+			QCPortAttributeTypeKey: QCPortTypeIndex,
+			QCPortAttributeMinimumValueKey: @0,
+			QCPortAttributeMaximumValueKey: @3,
+			QCPortAttributeMenuItemsKey: @[
+				@"Off",
+				@"Short",
+				@"Medium",
+				@"Long",
+			],
 		};
 	}
 	
@@ -214,6 +226,25 @@
 
 - (BOOL)execute:(id<QCPlugInContext>)context atTime:(NSTimeInterval)time withArguments:(NSDictionary *)arguments
 {
+	if([self didValueForInputKeyChange:@"inputVibration"])
+	{
+		NSLog(@"%ld", self.inputVibration);
+		switch(self.inputVibration)
+		{
+			case 1:
+				[self vibrateWithType:libmyo_vibration_short];
+				break;
+				
+			case 2:
+				[self vibrateWithType:libmyo_vibration_medium];
+				break;
+				
+			case 3:
+				[self vibrateWithType:libmyo_vibration_long];
+				break;
+		}
+	}
+	
 	[outputValueLock lock];
 	
 	// status
@@ -334,7 +365,6 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 {
 	dispatch_sync(queue, ^{
 		libmyo_event_type_t type = libmyo_event_get_type(event);
-		libmyo_myo_t myo = libmyo_event_get_myo(event);
 		
 		[outputValueLock lock];
 
@@ -342,6 +372,8 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 		{
 			case libmyo_event_paired:
 			{
+				myo = libmyo_event_get_myo(event);
+				
 				self.paired = @YES;
 				break;
 			}
@@ -403,13 +435,6 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 			case libmyo_event_pose:
 			{
 				self.pose = @(libmyo_event_get_pose(event));
-
-				/*
-				if(self.pose.unsignedIntegerValue > 0 && self.pose.unsignedIntegerValue < libmyo_num_poses)
-				{
-					libmyo_vibrate(myo, libmyo_vibration_medium, NULL);
-				}
-				*/
 			}
 				
 			default:
@@ -426,7 +451,7 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 {
 	__block BOOL success = NO;
 	dispatch_sync(queue, ^{
-		libmyo_error_details_t error;
+		libmyo_error_details_t error = NULL;
 		libmyo_result_t result = libmyo_init_hub(&hub, &error);
 		if(result != libmyo_success)
 		{
@@ -446,7 +471,7 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			while(1)
 			{
-				libmyo_error_details_t error;
+				libmyo_error_details_t error = NULL;
 				libmyo_result_t result = libmyo_run(hub, 20, MyoHandler, (__bridge void *)self, &error);
 				if(result != libmyo_success)
 				{
@@ -464,10 +489,27 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 - (void)shutdownHub
 {
 	dispatch_sync(queue, ^{
+		myo = NULL;
+		
 		if(hub != NULL)
 		{
-			libmyo_error_details_t error;
+			libmyo_error_details_t error = NULL;
 			libmyo_result_t result = libmyo_shutdown_hub(hub, &error);
+			if(result != libmyo_success)
+			{
+				NSLog(@"%s:%d", __FUNCTION__, result);
+			}
+		}
+	});
+}
+
+- (void)vibrateWithType:(libmyo_vibration_type_t)vibration
+{
+	dispatch_async(queue, ^{
+		if(myo != NULL)
+		{
+			libmyo_error_details_t error = NULL;
+			libmyo_result_t result = libmyo_vibrate(myo, vibration, &error);
 			if(result != libmyo_success)
 			{
 				NSLog(@"%s:%d", __FUNCTION__, result);

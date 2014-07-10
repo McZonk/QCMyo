@@ -3,7 +3,7 @@
 
 @interface QCMyoPlugIn : QCPlugIn
 
-@property (assign) NSString *inputMacAddress;
+@property (assign) NSUInteger inputVibration;
 
 @property (assign) BOOL outputPaired;
 @property (assign) BOOL outputConnected;
