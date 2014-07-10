@@ -13,6 +13,8 @@
 	NSLock *outputValueLock;
 }
 
+@property (nonatomic, strong) NSString *trainingFilename;
+
 @property (nonatomic, strong) NSNumber *paired;
 @property (nonatomic, strong) NSNumber *connected;
 @property (nonatomic, strong) NSNumber *trained;
@@ -31,6 +33,9 @@
 @property (nonatomic, strong) NSNumber *gyroscopeZ;
 
 @property (nonatomic, strong) NSNumber *pose;
+
+@property (assign) BOOL stopRunning;
+@property (assign) BOOL stoppedRunning;
 
 @end
 
@@ -204,6 +209,7 @@
 	if(self != nil)
 	{
 		queue = dispatch_queue_create("Myo", DISPATCH_QUEUE_SERIAL);
+		group = dispatch_group_create();
 		
 		outputValueLock = [[NSLock alloc] init];
 	}
@@ -481,7 +487,7 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 		}
 		
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-			while(1)
+			while(!self.stopRunning)
 			{
 				libmyo_error_details_t error = NULL;
 				libmyo_result_t result = libmyo_run(hub, 20, MyoHandler, (__bridge void *)self, &error);
@@ -490,6 +496,10 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 					break;
 				}
 			}
+			
+			self.stopRunning = NO;
+			
+			dispatch_group_leave(group);
 		});
 		
 		success = YES;
@@ -505,6 +515,12 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 		
 		if(hub != NULL)
 		{
+			dispatch_group_enter(group);
+
+			self.stopRunning = YES;
+			
+			dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+			
 			libmyo_error_details_t error = NULL;
 			libmyo_result_t result = libmyo_shutdown_hub(hub, &error);
 			if(result != libmyo_success)
