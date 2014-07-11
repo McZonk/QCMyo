@@ -1,0 +1,330 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		5006EACE196C5F0800EAEE20 /* QCMyoPlugIn.m in Sources */ = {isa = PBXBuildFile; fileRef = 5006EACD196C5F0800EAEE20 /* QCMyoPlugIn.m */; };
+		507CA52B196DCBF5003EA8F7 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 507CA52A196DCBF5003EA8F7 /* Quartz.framework */; };
+		507CA52D196DCBFB003EA8F7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 507CA52C196DCBFB003EA8F7 /* Cocoa.framework */; };
+		507CA530196DCC54003EA8F7 /* myo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 507CA52F196DCC54003EA8F7 /* myo.framework */; };
+		507CA533196DCFDA003EA8F7 /* myo.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 507CA52F196DCC54003EA8F7 /* myo.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		507CA531196DCF5F003EA8F7 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		507CA532196DCFCC003EA8F7 /* Copy Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				507CA533196DCFDA003EA8F7 /* myo.framework in Copy Frameworks */,
+			);
+			name = "Copy Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		5006EAC7196C5F0800EAEE20 /* QCMyo.plugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = QCMyo.plugin; sourceTree = BUILT_PRODUCTS_DIR; };
+		5006EACB196C5F0800EAEE20 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5006EACC196C5F0800EAEE20 /* QCMyoPlugIn.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QCMyoPlugIn.h; sourceTree = "<group>"; };
+		5006EACD196C5F0800EAEE20 /* QCMyoPlugIn.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QCMyoPlugIn.m; sourceTree = "<group>"; };
+		507CA52A196DCBF5003EA8F7 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
+		507CA52C196DCBFB003EA8F7 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		507CA52F196DCC54003EA8F7 /* myo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = myo.framework; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		5006EAC3196C5F0800EAEE20 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				507CA530196DCC54003EA8F7 /* myo.framework in Frameworks */,
+				507CA52D196DCBFB003EA8F7 /* Cocoa.framework in Frameworks */,
+				507CA52B196DCBF5003EA8F7 /* Quartz.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		5006EABD196C5F0800EAEE20 = {
+			isa = PBXGroup;
+			children = (
+				5006EAC9196C5F0800EAEE20 /* QCMyo */,
+				507CA52E196DCC37003EA8F7 /* Frameworks */,
+				5006EAC8196C5F0800EAEE20 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5006EAC8196C5F0800EAEE20 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5006EAC7196C5F0800EAEE20 /* QCMyo.plugin */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5006EAC9196C5F0800EAEE20 /* QCMyo */ = {
+			isa = PBXGroup;
+			children = (
+				5006EACC196C5F0800EAEE20 /* QCMyoPlugIn.h */,
+				5006EACD196C5F0800EAEE20 /* QCMyoPlugIn.m */,
+				5006EACA196C5F0800EAEE20 /* Supporting Files */,
+			);
+			path = QCMyo;
+			sourceTree = "<group>";
+		};
+		5006EACA196C5F0800EAEE20 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				5006EACB196C5F0800EAEE20 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		507CA52E196DCC37003EA8F7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				507CA52F196DCC54003EA8F7 /* myo.framework */,
+				507CA52C196DCBFB003EA8F7 /* Cocoa.framework */,
+				507CA52A196DCBF5003EA8F7 /* Quartz.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5006EAC6196C5F0800EAEE20 /* QCMyo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5006EAD1196C5F0800EAEE20 /* Build configuration list for PBXNativeTarget "QCMyo" */;
+			buildPhases = (
+				5006EAC2196C5F0800EAEE20 /* Sources */,
+				5006EAC3196C5F0800EAEE20 /* Frameworks */,
+				507CA531196DCF5F003EA8F7 /* CopyFiles */,
+				507CA532196DCFCC003EA8F7 /* Copy Frameworks */,
+				5006EAC5196C5F0800EAEE20 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = QCMyo;
+			productName = QCMyo;
+			productReference = 5006EAC7196C5F0800EAEE20 /* QCMyo.plugin */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		5006EABE196C5F0800EAEE20 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0600;
+				ORGANIZATIONNAME = McZonk;
+				TargetAttributes = {
+					5006EAC6196C5F0800EAEE20 = {
+						CreatedOnToolsVersion = 6.0;
+					};
+				};
+			};
+			buildConfigurationList = 5006EAC1196C5F0800EAEE20 /* Build configuration list for PBXProject "QCMyo" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 5006EABD196C5F0800EAEE20;
+			productRefGroup = 5006EAC8196C5F0800EAEE20 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5006EAC6196C5F0800EAEE20 /* QCMyo */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		5006EAC5196C5F0800EAEE20 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 12;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# This shell script simply copies the built plug-in to \"~/Library/Graphics/Quartz Composer Plug-Ins\" and overrides any previous version at that location\n\nmkdir -p \"$USER_LIBRARY_DIR/Graphics/Quartz Composer Plug-Ins\"\nrm -rf \"$USER_LIBRARY_DIR/Graphics/Quartz Composer Plug-Ins/QCMyo.plugin\"\ncp -rf \"$BUILT_PRODUCTS_DIR/QCMyo.plugin\" \"$USER_LIBRARY_DIR/Graphics/Quartz Composer Plug-Ins/\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5006EAC2196C5F0800EAEE20 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5006EACE196C5F0800EAEE20 /* QCMyoPlugIn.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		5006EACF196C5F0800EAEE20 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Applications/Xcode6-Beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include",
+					.,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				METAL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		5006EAD0196C5F0800EAEE20 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Applications/Xcode6-Beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include",
+					.,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				METAL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		5006EAD2196C5F0800EAEE20 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
+				INFOPLIST_FILE = QCMyo/Info.plist;
+				INSTALL_PATH = "$(HOME)/Library/Graphics/Quartz Composer Plug-Ins";
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = plugin;
+			};
+			name = Debug;
+		};
+		5006EAD3196C5F0800EAEE20 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
+				INFOPLIST_FILE = QCMyo/Info.plist;
+				INSTALL_PATH = "$(HOME)/Library/Graphics/Quartz Composer Plug-Ins";
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = plugin;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5006EAC1196C5F0800EAEE20 /* Build configuration list for PBXProject "QCMyo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5006EACF196C5F0800EAEE20 /* Debug */,
+				5006EAD0196C5F0800EAEE20 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5006EAD1196C5F0800EAEE20 /* Build configuration list for PBXNativeTarget "QCMyo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5006EAD2196C5F0800EAEE20 /* Debug */,
+				5006EAD3196C5F0800EAEE20 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 5006EABE196C5F0800EAEE20 /* Project object */;
+}
