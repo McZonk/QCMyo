@@ -12,6 +12,7 @@
 		507CA52B196DCBF5003EA8F7 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 507CA52A196DCBF5003EA8F7 /* Quartz.framework */; };
 		507CA52D196DCBFB003EA8F7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 507CA52C196DCBFB003EA8F7 /* Cocoa.framework */; };
 		50DE8C8C197044AA00B6EAFA /* myo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 50DE8C8B197044AA00B6EAFA /* myo.framework */; };
+		50DF488119706F43000B078B /* MYOHub.m in Sources */ = {isa = PBXBuildFile; fileRef = 50DF488019706F43000B078B /* MYOHub.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -45,6 +46,8 @@
 		507CA52A196DCBF5003EA8F7 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
 		507CA52C196DCBFB003EA8F7 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		50DE8C8B197044AA00B6EAFA /* myo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = myo.framework; path = QCMyo/myo.framework; sourceTree = "<group>"; };
+		50DF487F19706F43000B078B /* MYOHub.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MYOHub.h; sourceTree = "<group>"; };
+		50DF488019706F43000B078B /* MYOHub.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MYOHub.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,6 +87,8 @@
 				5006EACC196C5F0800EAEE20 /* QCMyoPlugIn.h */,
 				5006EACD196C5F0800EAEE20 /* QCMyoPlugIn.m */,
 				5006EACB196C5F0800EAEE20 /* Info.plist */,
+				50DF487F19706F43000B078B /* MYOHub.h */,
+				50DF488019706F43000B078B /* MYOHub.m */,
 			);
 			path = QCMyo;
 			sourceTree = "<group>";
@@ -174,6 +179,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5006EACE196C5F0800EAEE20 /* QCMyoPlugIn.m in Sources */,
+				50DF488119706F43000B078B /* MYOHub.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

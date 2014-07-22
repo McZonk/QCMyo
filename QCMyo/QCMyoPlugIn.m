@@ -1,6 +1,7 @@
 #import "QCMyoPlugIn.h"
 
-#import <myo/libmyo.h>
+#import "MYOHub.h"
+
 
 typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
 {
@@ -12,13 +13,9 @@ typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
 
 
 @interface QCMyoPlugIn ()
-{
-	libmyo_hub_t hub;
-	libmyo_myo_t myo;
-	dispatch_queue_t queue;
-	
-	NSLock *outputValueLock;
-}
+
+@property (nonatomic, strong) MYOHub *hub;
+@property (nonatomic, strong) id<NSLocking> lock;
 
 @property (nonatomic, assign) QCMyoPlugInPairingMode pairingMode;
 @property (nonatomic, copy) NSString *paringMacAddress;
@@ -45,7 +42,12 @@ typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
 
 @property (nonatomic, strong) NSNumber *pose;
 
-@property (assign) BOOL stopRunning;
+@property (weak) id pairedObserver;
+@property (weak) id trainedObserver;
+@property (weak) id connectedObserver;
+@property (weak) id disconnectObserver;
+@property (weak) id orientationObserver;
+@property (weak) id poseObserver;
 
 @end
 
@@ -246,23 +248,112 @@ typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
 	self = [super init];
 	if(self != nil)
 	{
-		queue = dispatch_queue_create("Myo", DISPATCH_QUEUE_SERIAL);
-		
-		outputValueLock = [[NSLock alloc] init];
+		self.hub = [MYOHub sharedHub];
+
+		self.lock = [[NSLock alloc] init];
 	}
 	return self;
 }
 
 - (BOOL)startExecution:(id<QCPlugInContext>)context
 {
-	BOOL success = [self setupHubWithError:nil];
+	MYOHub *hub = self.hub;
 	
+	BOOL success = [hub setupWithError:nil];
+	if(success)
+	{
+		NSNotificationCenter *notificationCenter = NSNotificationCenter.defaultCenter;
+		
+		__weak typeof(self) weakSelf = self;
+		self.pairedObserver = [notificationCenter addObserverForName:MYOHubDidPairNotification object:hub queue:nil usingBlock:^(NSNotification *notification) {
+			typeof(self) self = weakSelf;
+			
+			id<NSLocking> lock = self.lock;
+			[lock lock];
+			self.paired = @YES;
+			[lock unlock];
+		}];
+		
+		self.trainedObserver = [notificationCenter addObserverForName:MYOHubDidLoadTrainingProfileNotification object:hub queue:nil usingBlock:^(NSNotification *notification) {
+			typeof(self) self = weakSelf;
+			
+			id<NSLocking> lock = self.lock;
+			[lock lock];
+			self.trained = @YES;
+			[lock unlock];
+		}];
+
+		self.connectedObserver = [notificationCenter addObserverForName:MYOHubDidConnectMyoNotification object:hub queue:nil usingBlock:^(NSNotification *notification) {
+			typeof(self) self = weakSelf;
+			
+			id<NSLocking> lock = self.lock;
+			[lock lock];
+			self.connected = @YES;
+			[lock unlock];
+		}];
+
+		self.disconnectObserver = [notificationCenter addObserverForName:MYOHubDidDisconnectMyoNotification object:hub queue:nil usingBlock:^(NSNotification *notification) {
+			typeof(self) self = weakSelf;
+			
+			id<NSLocking> lock = self.lock;
+			[lock lock];
+			self.trained = @NO;
+			self.connected = @NO;
+			self.paired = @NO;
+			[lock unlock];
+		}];
+
+		self.orientationObserver = [notificationCenter addObserverForName:MYOHubDidReceiveOrientationData object:hub queue:nil usingBlock:^(NSNotification *notification) {
+			typeof(self) self = weakSelf;
+			
+			NSDictionary *userInfo = notification.userInfo;
+
+			id<NSLocking> lock = self.lock;
+			[lock lock];
+			self.orientationX = userInfo[MYOHubOrientationXKey];
+			self.orientationY = userInfo[MYOHubOrientationYKey];
+			self.orientationZ = userInfo[MYOHubOrientationZKey];
+			self.orientationW = userInfo[MYOHubOrientationWKey];
+			[lock unlock];
+		}];
+		
+		self.poseObserver = [notificationCenter addObserverForName:MYOHubDidRecognizePose object:hub queue:nil usingBlock:^(NSNotification *notification) {
+			typeof(self) self = weakSelf;
+
+			NSDictionary *userInfo = notification.userInfo;
+			
+			id<NSLocking> lock = self.lock;
+			[lock lock];
+			self.pose = userInfo[MYOHubPoseKey];
+			[lock unlock];
+		}];
+	}
 	return success;
 }
 
 - (void)stopExecution:(id <QCPlugInContext>)context
 {
-	[self shutdownHub];
+	NSNotificationCenter *notificationCenter = NSNotificationCenter.defaultCenter;
+	
+	id pairedObserver = self.pairedObserver;
+	[notificationCenter removeObserver:pairedObserver];
+	
+	id trainedObserver = self.trainedObserver;
+	[notificationCenter removeObserver:trainedObserver];
+
+	id connectedObserver = self.connectedObserver;
+	[notificationCenter removeObserver:connectedObserver];
+
+	id disconnectObserver = self.disconnectObserver;
+	[notificationCenter removeObserver:disconnectObserver];
+
+	id orientationObserver = self.orientationObserver;
+	[notificationCenter removeObserver:orientationObserver];
+
+	id poseObserver = self.poseObserver;
+	[notificationCenter removeObserver:poseObserver];
+
+	[self.hub shutdown];
 }
 
 - (void)enableExecution:(id<QCPlugInContext>)context
@@ -277,7 +368,8 @@ typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
 
 - (BOOL)execute:(id<QCPlugInContext>)context atTime:(NSTimeInterval)time withArguments:(NSDictionary *)arguments
 {
-	[outputValueLock lock];
+	id<NSLocking> lock = self.lock;
+	[lock lock];
 	
 	if([self didValueForInputKeyChange:@"inputPairingMacAddress"])
 	{
@@ -286,34 +378,20 @@ typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
 	
 	if([self didValueForInputKeyChange:@"inputPairingMode"])
 	{
-		self.pairingMode = self.inputPairingMode;
-		
-		[self pair];
+		MYOHubPairingMode pairingMode = self.inputPairingMode;
+		[self.hub pairWithMode:pairingMode macAddress:self.paringMacAddress];
 	}
 
 	if([self didValueForInputKeyChange:@"inputTrainingFilename"])
 	{
-		self.trainingFilename = self.inputTrainingFilename;
-		
-		[self loadTraining];
+		NSString *trainingFilename = self.inputTrainingFilename;
+		[self.hub loadTrainingWithContentsOfPath:trainingFilename];
 	}
 	
 	if([self didValueForInputKeyChange:@"inputVibration"])
 	{
-		switch(self.inputVibration)
-		{
-			case 1:
-				[self vibrateWithType:libmyo_vibration_short];
-				break;
-				
-			case 2:
-				[self vibrateWithType:libmyo_vibration_medium];
-				break;
-				
-			case 3:
-				[self vibrateWithType:libmyo_vibration_long];
-				break;
-		}
+		MYOHubVibrationType vibrationType = self.inputVibration - 1;
+		[self.hub vibrateWithType:vibrationType];
 	}
 	
 	// status
@@ -421,272 +499,9 @@ typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
 		self.pose = nil;
 	}
 	
-	[outputValueLock unlock];
+	[lock unlock];
 	
 	return YES;
-}
-
-#pragma mark - Myo
-
-static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
-{
-	QCMyoPlugIn *self = (__bridge QCMyoPlugIn *)userData;
-	[self handleEvent:event];
-	
-	return libmyo_handler_continue;
-}
-
-- (void)handleEvent:(libmyo_event_t)event
-{
-	dispatch_sync(queue, ^{
-		libmyo_event_type_t type = libmyo_event_get_type(event);
-		
-		[outputValueLock lock];
-
-		switch(type)
-		{
-			case libmyo_event_paired:
-			{
-				myo = libmyo_event_get_myo(event);
-				
-				self.paired = @YES;
-				
-				{
-					uint64_t macAddress = libmyo_get_mac_address(myo);
-					libmyo_string_t macAddressString = libmyo_mac_address_to_string(macAddress);
-					self.macAddress = [NSString stringWithUTF8String:libmyo_string_c_str(macAddressString)];
-					libmyo_string_free(macAddressString), macAddressString = NULL;
-				}
-				break;
-			}
-			
-			case libmyo_event_connected:
-			{
-				self.connected = @YES;
-
-				[self loadTraining];
-				break;
-			}
-			
-			case libmyo_event_disconnected:
-			{
-				self.trained = @NO;
-				self.connected = @NO;
-				self.paired = @NO;
-				
-				self.orientationX = @0.0;
-				self.orientationY = @0.0;
-				self.orientationZ = @0.0;
-				self.orientationW = @0.0;
-
-				self.accelerometerX = @0.0;
-				self.accelerometerY = @0.0;
-				self.accelerometerZ = @0.0;
-				
-				self.gyroscopeX = @0.0;
-				self.gyroscopeY = @0.0;
-				self.gyroscopeZ = @0.0;
-
-				self.pose = @(libmyo_pose_rest);
-				
-				break;
-			}
-			
-			case libmyo_event_orientation:
-			{
-				self.orientationX = @(libmyo_event_get_orientation(event, libmyo_orientation_x));
-				self.orientationY = @(libmyo_event_get_orientation(event, libmyo_orientation_y));
-				self.orientationZ = @(libmyo_event_get_orientation(event, libmyo_orientation_z));
-				self.orientationW = @(libmyo_event_get_orientation(event, libmyo_orientation_w));
-				
-				self.accelerometerX = @(libmyo_event_get_accelerometer(event, 0));
-				self.accelerometerY = @(libmyo_event_get_accelerometer(event, 1));
-				self.accelerometerZ = @(libmyo_event_get_accelerometer(event, 2));
-
-				self.gyroscopeX = @(libmyo_event_get_gyroscope(event, 0));
-				self.gyroscopeY = @(libmyo_event_get_gyroscope(event, 1));
-				self.gyroscopeZ = @(libmyo_event_get_gyroscope(event, 2));
-
-				break;
-			}
-				
-			case libmyo_event_pose:
-			{
-				self.pose = @(libmyo_event_get_pose(event));
-				
-				break;
-			}
-				
-			default:
-				NSLog(@"%s:%d:%d", __FUNCTION__, __LINE__, type);
-				break;
-		}
-
-		[outputValueLock unlock];
-	});
-}
-
-- (BOOL)setupHubWithError:(NSError **)error
-{
-	__block BOOL success = NO;
-	dispatch_sync(queue, ^{
-		libmyo_error_details_t error = NULL;
-		libmyo_result_t result = libmyo_init_hub(&hub, &error);
-		if(result != libmyo_success)
-		{
-			NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
-			libmyo_free_error_details(error), error = NULL;
-			return;
-		}
-		
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-			while(!self.stopRunning)
-			{
-				libmyo_error_details_t error = NULL;
-				libmyo_result_t result = libmyo_run(hub, 20, MyoHandler, (__bridge void *)self, &error);
-				if(result != libmyo_success)
-				{
-					NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
-					libmyo_free_error_details(error), error = NULL;
-				}
-			}
-			
-			dispatch_async(queue, ^{
-				myo = NULL;
-				
-				if(hub != NULL)
-				{
-					libmyo_error_details_t error = NULL;
-					libmyo_result_t result = libmyo_shutdown_hub(hub, &error);
-					if(result != libmyo_success)
-					{
-						NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
-						libmyo_free_error_details(error), error = NULL;
-					}
-				
-					hub = NULL;
-				}
-
-				self.stopRunning = NO;
-			});
-		});
-		
-		success = YES;
-	});
-	
-	return success;
-}
-
-- (void)shutdownHub
-{
-	self.stopRunning = YES;
-}
-
-- (void)pair
-{
-	dispatch_async(queue, ^{
-		if(myo == NULL)
-		{
-			[outputValueLock lock];
-			
-			switch(self.pairingMode)
-			{
-				case QCMyoPlugInPairingModeNone:
-				{
-					break;
-				}
-					
-				case QCMyoPlugInPairingModeAny:
-				{
-					libmyo_error_details_t error = NULL;
-					libmyo_result_t result = libmyo_pair_any(hub, 1, &error);
-					if(result != libmyo_success)
-					{
-						NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
-						libmyo_free_error_details(error), error = NULL;
-					}
-					break;
-				}
-					
-				case QCMyoPlugInPairingModeAdjacent:
-				{
-					libmyo_error_details_t error = NULL;
-					libmyo_result_t result = libmyo_pair_adjacent(hub, 1, &error);
-					if(result != libmyo_success)
-					{
-						NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
-						libmyo_free_error_details(error), error = NULL;
-					}
-					break;
-				}
-					
-				case QCMyoPlugInPairingModeMacAddress:
-				{
-					uint64 macAddress = libmyo_string_to_mac_address(self.paringMacAddress.UTF8String);
-					if(macAddress != 0)
-					{
-						libmyo_error_details_t error = NULL;
-						libmyo_result_t result = libmyo_pair_by_mac_address(hub, macAddress, &error);
-						if(result != libmyo_success)
-						{
-							NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
-							libmyo_free_error_details(error), error = NULL;
-						}
-					}
-					break;
-				}
-			}
-			
-			[outputValueLock unlock];
-		}
-	});
-}
-
-- (void)loadTraining
-{
-	dispatch_async(queue, ^{
-		if(myo != NULL)
-		{
-			[outputValueLock lock];
-			
-			NSString *trainingFilename = self.trainingFilename;
-			if(trainingFilename.length == 0)
-			{
-				trainingFilename = nil;
-			}
-			
-			libmyo_error_details_t error = NULL;
-			libmyo_result_t result = libmyo_training_load_profile(myo, trainingFilename.UTF8String, &error);
-			if(result != libmyo_success)
-			{
-				NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
-				libmyo_free_error_details(error), error = NULL;
-				self.trained = @NO;
-			}
-			else
-			{
-				self.trained = @YES;
-			}
-			
-			[outputValueLock unlock];
-		}
-	});
-}
-
-- (void)vibrateWithType:(libmyo_vibration_type_t)vibration
-{
-	dispatch_async(queue, ^{
-		if(myo != NULL)
-		{
-			libmyo_error_details_t error = NULL;
-			libmyo_result_t result = libmyo_vibrate(myo, vibration, &error);
-			if(result != libmyo_success)
-			{
-				NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
-				libmyo_free_error_details(error), error = NULL;
-			}
-		}
-	});
 }
 
 @end
