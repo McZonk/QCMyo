@@ -1,5 +1,5 @@
 // Copyright (C) 2013-2014 Thalmic Labs Inc.
-// Confidential and not for redistribution. See LICENSE.txt.
+// Distributed under the Myo SDK license agreement. See LICENSE.txt for details.
 #ifndef MYO_CXX_IMPL_POSE_IMPL_HPP
 #define MYO_CXX_IMPL_POSE_IMPL_HPP
 
@@ -77,8 +77,10 @@ std::string Pose::toString() const
         return "waveOut";
     case Pose::fingersSpread:
         return "fingersSpread";
-    case Pose::twistIn:
-        return "twistIn";
+    case Pose::reserved1:
+        return "reserved1";
+    case Pose::thumbToPinky:
+        return "thumbToPinky";
     case Pose::unknown:
         return "unknown";
     }

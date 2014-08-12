@@ -1,5 +1,5 @@
 // Copyright (C) 2013-2014 Thalmic Labs Inc.
-// Confidential and not for redistribution. See LICENSE.txt.
+// Distributed under the Myo SDK license agreement. See LICENSE.txt for details.
 #ifndef MYO_LIBMYO_H
 #define MYO_LIBMYO_H
 
@@ -10,6 +10,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/// @file libmyo.h
+/// libmyo C API declarations.
 
 typedef void* libmyo_hub_t;
 
@@ -42,80 +45,31 @@ void libmyo_free_error_details(libmyo_error_details_t);
 
 /// @}
 
-/// \defgroup libmyo_string Strings
-/// @{
-
-// Opaque string.
-typedef void* libmyo_string_t;
-
-// Return a null-terminated string from the opaque string.
-LIBMYO_EXPORT
-const char* libmyo_string_c_str(libmyo_string_t);
-
-// Free the resources allocated by the string object.
-LIBMYO_EXPORT
-void libmyo_string_free(libmyo_string_t);
-
-/// @}
-
-/// \defgroup libmyo_mac_addresses MAC address utilities
-/// @{
-
-/// Retrieve the string representation of a MAC address in hex.
-/// Returns a string in the format of 00-00-00-00-00-00.
-LIBMYO_EXPORT
-libmyo_string_t libmyo_mac_address_to_string(uint64_t);
-
-/// Retrieve the MAC address from a null-terminated string in the format of 00-00-00-00-00-00.
-/// Returns 0 if the string does not match the format.
-LIBMYO_EXPORT
-uint64_t libmyo_string_to_mac_address(const char*);
-
-/// @}
-
 /// @defgroup libmyo_hub Hub instance
 /// @{
 
-/// Initialize a hub.
-/// Not safe to call concurrently with other calls to libmyo_init_hub() and libmyo_shutdown_hub().
-/// Only one hub can exist at a time.
-/// @returns libmyo_success if init is successful, otherwise:
+/// Initialize a connection to the hub.
+/// \a application_identifier must follow a reverse domain name format (ex. com.domainname.appname). Application
+/// identifiers can be formed from the set of alphanumeric ASCII characters (a-z, A-Z, 0-9). The hyphen (-) and
+/// underscore (_) characters are permitted if they are not adjacent to a period (.) character (i.e. not at the start or
+/// end of each segment), but are not permitted in the top-level domain. Application identifiers must have three or more
+/// segments. For example, if a company's domain is example.com and the application is named hello-world, one could use
+/// "com.example.hello-world" as a valid application identifier. \a application_identifier can be NULL or empty.
+/// @returns libmyo_success if the connection is successfully established, otherwise:
+///  - libmyo_error_runtime if a connection could not be established
 ///  - libmyo_error_invalid_argument if \a out_hub is NULL
-///  - libmyo_error_invalid_argument results from having two hubs if a hub currently exists
+///  - libmyo_error_invalid_argument if \a application_identifier is longer than 255 characters
+///  - libmyo_error_invalid_argument if \a application_identifier is not in the proper reverse domain name format
 LIBMYO_EXPORT
-libmyo_result_t libmyo_init_hub(libmyo_hub_t* out_hub, libmyo_error_details_t* out_error);
+libmyo_result_t libmyo_init_hub(libmyo_hub_t* out_hub, const char* application_identifier,
+                                libmyo_error_details_t* out_error);
 
 /// Free the resources allocated to a hub.
-/// Not safe to call concurrently with other calls to libmyo_init_hub() and libmyo_shutdown_hub().
 /// @returns libmyo_success if shutdown is successful, otherwise:
 ///  - libmyo_error_invalid_argument if \a hub is NULL
 ///  - libmyo_error if \a hub is not a valid \a hub
 LIBMYO_EXPORT
 libmyo_result_t libmyo_shutdown_hub(libmyo_hub_t hub, libmyo_error_details_t* out_error);
-
-/// Callback type to receive warnings issued by libmyo.
-/// The first argument to the function is whatever was passed to the \a user_data parameter of
-/// libmyo_hub_set_warning_callback().
-/// In general, warning messages do not end with a newline.
-/// libmyo will not call the callback from more than one thread at a time, but any given call to
-/// the callback may come from a different thread than another.
-/// The lifetime of the argument passed to the callback does not extend past the call to the callback.
-/// @see libmyo_hub_set_warning_callback()
-typedef void (*libmyo_warning_callback_t)(void* user_data, const char* message);
-
-/// Set the callback for warnings issued issued by libmyo.
-/// If \a callback is non-NULL, libmyo will call it whenever it issues as warning.
-/// If \a callback is NULL, libmyo will output warnings to stderr.
-/// \a user_data will be passed to \a callback whenever it is called.
-/// If \a old_callback is non-NULL, stores the previous callback (which could be NULL) there.
-/// If \a old_user_data is non-NULL, stores the previous \a user_data value there.
-/// @see libmyo_warning_callback_t
-LIBMYO_EXPORT
-libmyo_result_t libmyo_hub_set_warning_callback(libmyo_hub_t hub, libmyo_warning_callback_t callback,
-                                                void* user_data,
-                                                libmyo_warning_callback_t* out_old_callback,
-                                                void** old_user_data,
-                                                libmyo_error_details_t* out_error);
 
 /// @}
 
@@ -124,11 +78,6 @@ libmyo_result_t libmyo_hub_set_warning_callback(libmyo_hub_t hub, libmyo_warning
 
 /// Opaque type corresponding to a known Myo device.
 typedef void* libmyo_myo_t;
-
-/// Retrieve the MAC address of a Myo.
-/// The MAC address is unique to the physical Myo, and is a 48-bit number.
-LIBMYO_EXPORT
-uint64_t libmyo_get_mac_address(libmyo_myo_t myo);
 
 /// Types of vibration
 typedef enum {
@@ -153,151 +102,29 @@ libmyo_result_t libmyo_request_rssi(libmyo_myo_t myo, libmyo_error_details_t* ou
 
 /// @}
 
-/// @defgroup libmyo_pairing Pairing
-/// Pairing with a Myo means we have discovered a nearby Myo device and will attempt to maintain a connection with it.
-/// Pairing can be initiated with a function like libmyo_pair_any().
-/// In order to actually pair with a device, libmyo_run needs to be called until a libmyo_event_paired event occurs.
-/// Only paired devices will generate events.
-/// @{
-
-/// Initiate pairing with \a count Myos.
-///
-/// The \a hub will attempt to pair with Myos until \a count Myos have successfully connected.
-///
-/// When the `MYO_PAIR_WITH_MAC` environment variable is set to a comma-separated list of MAC addresses, the hub will
-/// ignore any Myos with MAC addresses not listed in the variable.
-///
-/// @returns libmyo_success if pairing initiated successfully, otherwise
-///  - libmyo_error_invalid_argument if \a hub is NULL
-///  - libmyo_error_invalid_argument if count is 0
-///  - libmyo_error_runtime if pairing has already been initiated
-///  - libmyo_error_runtime if the Bluetooth controller is unable to pair with multiple devices reliably
-LIBMYO_EXPORT
-libmyo_result_t libmyo_pair_any(libmyo_hub_t hub, unsigned int count, libmyo_error_details_t* out_error);
-
-/// Initiate pairing with the device with MAC address \a mac_address.
-/// @returns libmyo_success if pairing initiated successfully, otherwise
-///  - libmyo_error_invalid_argument if \a hub is NULL
-///  - libmyo_error_invalid_argument if mac_address is invalid (e.g. is zero or takes up more than the low 48 bits)
-///  - libmyo_error_runtime if pairing has already been initiated
-LIBMYO_EXPORT
-libmyo_result_t libmyo_pair_by_mac_address(libmyo_hub_t hub, uint64_t mac_address, libmyo_error_details_t* out_errors);
-
-/// Initiate pairing with \a count Myos that are very close (likely touching) the host controller.
-/// @returns libmyo_success if pairing initiated successfully, otherwise
-///  - libmyo_error_invalid_argument if \a hub is NULL
-///  - libmyo_error_invalid_argument if count is 0
-///  - libmyo_error_runtime if pairing has already been initiated
-LIBMYO_EXPORT
-libmyo_result_t libmyo_pair_adjacent(libmyo_hub_t hub, unsigned int count, libmyo_error_details_t* out_error);
-
-/// @}
-
 /// @defgroup libmyo_poses Pose recognition.
 /// @{
 
 /// Supported poses.
 typedef enum {
-    libmyo_pose_rest,            ///< Rest pose.
-    libmyo_pose_fist,            ///< User is making a fist.
-    libmyo_pose_wave_in,         ///< User has an open palm rotated towards the posterior of their wrist.
-    libmyo_pose_wave_out,        ///< User has an open palm rotated towards the anterior of their wrist.
-    libmyo_pose_fingers_spread,  ///< User has an open palm with their fingers spread away from each other.
-    libmyo_pose_twist_in,        ///< User is twisting their wrist inward (CCW for right hand, CW for left hand).
+    libmyo_pose_rest           = 0, ///< Rest pose.
+    libmyo_pose_fist           = 1, ///< User is making a fist.
+    libmyo_pose_wave_in        = 2, ///< User has an open palm rotated towards the posterior of their wrist.
+    libmyo_pose_wave_out       = 3, ///< User has an open palm rotated towards the anterior of their wrist.
+    libmyo_pose_fingers_spread = 4, ///< User has an open palm with their fingers spread away from each other.
+    libmyo_pose_reserved1      = 5, ///< Reserved value; not a valid pose.
+    libmyo_pose_thumb_to_pinky = 6, ///< User is touching the tip of their thumb to the tip of their pinky.
 
-    libmyo_num_poses,            ///< Number of poses supported; not a valid pose.
+    libmyo_num_poses,               ///< Number of poses supported; not a valid pose.
 
-    libmyo_pose_unknown = 0xffff ///< Unknown pose.
+    libmyo_pose_unknown = 0xffff    ///< Unknown pose.
 } libmyo_pose_t;
 
-/// @}
+static const libmyo_pose_t libmyo_trained_poses[] = { libmyo_pose_rest, libmyo_pose_fist, libmyo_pose_wave_in,
+                                                      libmyo_pose_wave_out, libmyo_pose_fingers_spread,
+                                                      libmyo_pose_thumb_to_pinky };
+static const unsigned int libmyo_num_trained_poses = sizeof(libmyo_trained_poses) / sizeof(libmyo_trained_poses[0]);
 
-/// @defgroup libmyo_training Training.
-/// @{
-
-/// Return 1 if a training profile is available, 0 otherwise.
-LIBMYO_EXPORT
-int libmyo_training_is_available(libmyo_myo_t myo);
-
-/// Data to perform a training run.
-typedef void* libmyo_training_dataset_t;
-
-/// Allocate a training data object.
-/// @returns
-///  - libmyo_error_invalid_argument if \a myo is NULL.
-///  - libmyo_error_invalid_argument if \a out_dataset is NULL.
-LIBMYO_EXPORT
-libmyo_result_t libmyo_training_create_dataset(libmyo_myo_t myo, libmyo_training_dataset_t* out_dataset,
-                                               libmyo_error_details_t* out_error);
-
-/// A callback that's called while libmyo_training_collect_data() is executing.
-/// value is set to a value between 0 and 255 in order that can be visualized to provide feedback to the user as
-/// training data is collected, corresponding in some way to the electrical signal measured by the Myo.
-/// progress is set to a value between 0 and 255 which represents the overall progress of the data collection.
-typedef void (*libmyo_training_collect_status_t)(void* user_data, uint8_t value, uint8_t progress);
-
-/// Collect training data for the given pose into the provided data object.
-/// Must not be called concurrently with libmyo_run().
-/// Blocks until enough data has been collected.
-/// If \a callback is not NULL, call it periodically with updates on the collection progress.
-/// @returns libmyo_success if data was collected successfully, otherwise
-///  - libmyo_error_invalid_argument if \a dataset is NULL.
-///  - libmyo_error_invalid_argument if \a pose is not a valid \a pose
-LIBMYO_EXPORT
-libmyo_result_t libmyo_training_collect_data(libmyo_training_dataset_t dataset, libmyo_pose_t pose,
-                                             libmyo_training_collect_status_t callback, void* user_data,
-                                             libmyo_error_details_t* out_error);
-
-/// Train pose recognition from collected training data.
-/// @returns libmyo_success if training succeeded, otherwise
-///  - libmyo_error if one of the poses is missing data
-///  - libmyo_error_invalid_argument if \a dataset is NULL
-LIBMYO_EXPORT
-libmyo_result_t libmyo_training_train_from_dataset(libmyo_training_dataset_t dataset, libmyo_error_details_t* out_error);
-
-/// Release any resources associated with the provided training data.
-LIBMYO_EXPORT
-void libmyo_training_free_dataset(libmyo_training_dataset_t dataset);
-
-/// Load training results from the given filename.
-/// If filename is NULL, load the profile from the default profile file.
-/// @returns
-///  - libmyo_error if the file could not be read
-///  - libmyo_error_invalid_argument if \a myo is NULL.
-LIBMYO_EXPORT
-libmyo_result_t libmyo_training_load_profile(libmyo_myo_t myo, const char* filename,
-                                             libmyo_error_details_t* out_error);
-
-/// Store the current training profile using the provided filename.
-/// If filename is NULL, store the profile in the default profile file for this myo.
-/// @returns libmyo_success if the profile was stored successfully, otherwise
-///  - libmyo_error if there is no current training profile
-///  - libmyo_error if the file could not be written
-///  - libmyo_error_invalid_argument if \a myo is NULL.
-LIBMYO_EXPORT
-libmyo_result_t libmyo_training_store_profile(libmyo_myo_t myo, const char* filename,
-                                              libmyo_error_details_t* out_error);
-
-/// Asynchronously send the given training data to Thalmic Labs.
-/// @returns libmyo_success if the send was initiated, otherwise
-///  - libmyo_error_invalid_argument if \a dataset is NULL
-LIBMYO_EXPORT
-libmyo_result_t libmyo_training_send_training_data(libmyo_training_dataset_t dataset,
-                                                   libmyo_error_details_t* out_error);
-
-/// Attach a name and value to the given training data. These annotations will be included
-/// if training data is sent to Thalmic Labs.
-/// \note Using the same name in a subsequent call results in an update.
-/// @returns libmyo_success if the annotation was added successfully, otherwise
-///  - libmyo_error_invalid_argument if \a dataset is NULL
-///  - libmyo_error_invalid_argument if \a name or \a value is NULL
-///  - libmyo_error_invalid_argument if \a name is longer than 80 characters.
-///  - libmyo_error_invalid_argument if \a value is longer than 255 characters.
-LIBMYO_EXPORT
-libmyo_result_t libmyo_training_annotate_training_data(libmyo_training_dataset_t dataset,
-                                                       const char* name,
-                                                       const char* value,
-                                                       libmyo_error_details_t* out_error);
 /// @}
 
 /// @defgroup libmyo_events Event Handling
@@ -316,24 +143,16 @@ typedef enum {
 } libmyo_event_type_t;
 
 /// Information about an event.
-typedef void* libmyo_event_t;
+typedef const void* libmyo_event_t;
 
 /// Retrieve the type of an event.
 LIBMYO_EXPORT
-libmyo_event_type_t libmyo_event_get_type(libmyo_event_t event);
+uint32_t libmyo_event_get_type(libmyo_event_t event);
 
 /// Retrieve the timestamp of an event.
 /// @see libmyo_now() for details on timestamps.
 LIBMYO_EXPORT
 uint64_t libmyo_event_get_timestamp(libmyo_event_t event);
-
-/// Retrieve the current timestamp.
-/// Timestamps are 64 bit unsigned integers that correspond to a number of microseconds since some (unspecified)
-/// period in time. Timestamps are monotonically non-decreasing. You can use libmyo_now() to, for example, ignore
-/// events that occur before or after a particular moment in time.
-/// @see libmyo_event_get_timestamp()
-LIBMYO_EXPORT
-uint64_t libmyo_now();
 
 /// Retrieve the Myo associated with an event.
 LIBMYO_EXPORT
@@ -341,26 +160,41 @@ libmyo_myo_t libmyo_event_get_myo(libmyo_event_t event);
 
 /// Components of version.
 typedef enum {
-    libmyo_version_major, ///< Major version.
-    libmyo_version_minor, ///< Minor version.
-    libmyo_version_patch, ///< Patch version.
+    libmyo_version_major,        ///< Major version.
+    libmyo_version_minor,        ///< Minor version.
+    libmyo_version_patch,        ///< Patch version.
+    libmyo_version_hardware_rev, ///< Hardware revision.
 } libmyo_version_component_t;
 
-/// Retrieve the Myo's firmware version from this event.
-/// Valid for libmyo_event_paired and libmyo_event_connected only.
+/// Retrieve the Myo armband's firmware version from this event.
+/// Valid for libmyo_event_paired and libmyo_event_connected events.
 LIBMYO_EXPORT
 unsigned int libmyo_event_get_firmware_version(libmyo_event_t event, libmyo_version_component_t);
 
 /// Enumeration identifying a right arm or left arm. @see libmyo_event_get_arm().
 typedef enum {
     libmyo_arm_right, ///< Myo is on the right arm.
-    libmyo_arm_left   ///< Myo is on the left arm.
+    libmyo_arm_left, ///< Myo is on the left arm.
+    libmyo_arm_unknown, ///< Unknown arm.
 } libmyo_arm_t;
 
 /// Retrieve the arm associated with an event.
 /// Valid for libmyo_event_arm_recognized events only.
 LIBMYO_EXPORT
 libmyo_arm_t libmyo_event_get_arm(libmyo_event_t event);
+
+/// Possible directions for Myo's +x axis relative to a user's arm.
+typedef enum {
+    libmyo_x_direction_toward_wrist, ///< Myo's +x axis is pointing toward the user's wrist.
+    libmyo_x_direction_toward_elbow, ///< Myo's +x axis is pointing toward the user's elbow.
+    libmyo_x_direction_unknown, ///< Unknown +x axis direction.
+} libmyo_x_direction_t;
+
+/// Retrieve the x-direction associated with an event.
+/// The x-direction specifies which way Myo's +x axis is pointing relative to the user's arm.
+/// Valid for libmyo_event_arm_recognized events only.
+LIBMYO_EXPORT
+libmyo_x_direction_t libmyo_event_get_x_direction(libmyo_event_t event);
 
 /// Index into orientation data, which is provided as a quaternion.
 /// Orientation data is returned as a unit quaternion of floats, represented as `w + x * i + y * j + z * k`.
@@ -414,7 +248,8 @@ typedef libmyo_handler_result_t (*libmyo_handler_t)(void* user_data, libmyo_even
 ///  - libmyo_error_invalid_argument if \a hub is NULL
 ///  - libmyo_error_invalid_argument if \a handler is NULL
 LIBMYO_EXPORT
-libmyo_result_t libmyo_run(libmyo_hub_t hub, unsigned int duration_ms, libmyo_handler_t handler, void* user_data, libmyo_error_details_t* out_error);
+libmyo_result_t libmyo_run(libmyo_hub_t hub, unsigned int duration_ms, libmyo_handler_t handler, void* user_data,
+                           libmyo_error_details_t* out_error);
 
 /// @}
 

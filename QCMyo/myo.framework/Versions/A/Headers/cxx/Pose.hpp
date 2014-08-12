@@ -1,5 +1,5 @@
 // Copyright (C) 2013-2014 Thalmic Labs Inc.
-// Confidential and not for redistribution. See LICENSE.txt.
+// Distributed under the Myo SDK license agreement. See LICENSE.txt for details.
 #ifndef MYO_CXX_POSE_HPP
 #define MYO_CXX_POSE_HPP
 
@@ -20,7 +20,8 @@ public:
         waveIn        = libmyo_pose_wave_in,
         waveOut       = libmyo_pose_wave_out,
         fingersSpread = libmyo_pose_fingers_spread,
-        twistIn       = libmyo_pose_twist_in,
+        reserved1     = libmyo_pose_reserved1,
+        thumbToPinky  = libmyo_pose_thumb_to_pinky,
         unknown       = libmyo_pose_unknown
     };
 

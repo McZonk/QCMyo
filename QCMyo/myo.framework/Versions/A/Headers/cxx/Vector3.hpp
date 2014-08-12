@@ -1,14 +1,17 @@
 // Copyright (C) 2013-2014 Thalmic Labs Inc.
-// Confidential and not for redistribution. See LICENSE.txt.
+// Distributed under the Myo SDK license agreement. See LICENSE.txt for details.
 #ifndef MYO_CXX_VECTOR3_HPP
 #define MYO_CXX_VECTOR3_HPP
+
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 namespace myo {
 
 /// A vector of three components.
-/// This type provides only very basic functionality to store three dimensional vector that's sufficient to retrieve
-/// the data to be placed in a full featured vector type. For example, this type does not support additions or dot
-/// products.
+/// This type provides very basic functionality to store a three dimensional vector that's sufficient to retrieve
+/// the data to be placed in a full featured vector type. A few common vector operations, such as dot product and
+/// cross product, are also provided.
 template<typename T>
 class Vector3 {
   public:
@@ -58,6 +61,41 @@ class Vector3 {
 
     /// Return the z-component of this vector.
     T z() const { return _data[2]; }
+
+    /// Return the magnitude of this vector.
+    T magnitude() const
+    {
+        return std::sqrt(x() * x() + y() * y() + z() * z());
+    }
+
+    /// Return a normalized copy of this vector.
+    Vector3 normalized() const
+    {
+        T norm = magnitude();
+        return Vector3(x() / norm, y() / norm, z() / norm);
+    }
+
+    /// Return the dot product of this vector and \a rhs.
+    T dot(const Vector3& rhs) const
+    {
+        return x() * rhs.x() + y() * rhs.y() + z() * rhs.z();
+    }
+
+    /// Return the cross product of this vector and \a rhs.
+    Vector3 cross(const Vector3& rhs) const
+    {
+        return Vector3(
+            y() * rhs.z() - z() * rhs.y(),
+            z() * rhs.x() - x() * rhs.z(),
+            x() * rhs.y() - y() * rhs.x()
+        );
+    }
+
+    /// Return the angle between this vector and \a rhs, in radians.
+    T angleTo(const Vector3& rhs) const
+    {
+        return std::acos(dot(rhs) / (magnitude() * rhs.magnitude()));
+    }
 
   private:
     T _data[3];

@@ -1,5 +1,5 @@
 // Copyright (C) 2013-2014 Thalmic Labs Inc.
-// Confidential and not for redistribution. See LICENSE.txt.
+// Distributed under the Myo SDK license agreement. See LICENSE.txt for details.
 #ifndef MYO_CXX_HUB_HPP
 #define MYO_CXX_HUB_HPP
 
@@ -16,46 +16,27 @@ class DeviceListener;
 class Hub {
 public:
     /// Construct a hub.
-    /// It is not safe to concurrently construct two Hub instances on two different threads.
-    /// Throws an exception of type std::runtime_error if another Hub instance exists.
-    Hub();
+    /// \a applicationIdentifier must follow a reverse domain name format (ex. com.domainname.appname). Application
+    /// identifiers can be formed from the set of alphanumeric ASCII characters (a-z, A-Z, 0-9). The hyphen (-) and
+    /// underscore (_) characters are permitted if they are not adjacent to a period (.) character  (i.e. not at the
+    /// start or end of each segment), but are not permitted in the top-level domain. Application identifiers must have
+    /// three or more segments. For example, if a company's domain is example.com and the application is named
+    /// hello-world, one could use "com.example.hello-world" as a valid application identifier. \a applicationIdentifier
+    /// can be an empty string.
+    /// Throws an exception of type std::invalid_argument if \a applicationIdentifier is not in the proper reverse
+    /// domain name format or is longer than 255 characters.
+    /// Throws an exception of type std::runtime_error if the hub initialization failed for some reason, typically
+    /// because Myo Connect is not running and a connection can thus not be established.
+    Hub(const std::string& applicationIdentifier = "");
 
     /// Deallocate any resources associated with a Hub.
     /// This will cause all Myo instances retrieved from this Hub to become invalid.
     ~Hub();
 
-    /// Find a nearby Myo and pair with it, or time out after \a timeout_ms milliseconds if provided.
+    /// Wait for a Myo to become paired, or time out after \a timeout_ms milliseconds if provided.
     /// If \a timeout_ms is zero, this function blocks until a Myo is found.
-    /// This function must not be run concurrently with run() or runOnce().
-    Myo* waitForAnyMyo(unsigned int timeout_ms = 0);
-
-    /// Wait until a Myo is physically very near to the Bluetooth radio and pair with it, or time out after
-    /// \a timeout_ms milliseconds if provided.
-    /// If \a timeout_ms is zero, this function blocks until a Myo is found.
-    /// This function must not be run concurrently with run() or runOnce().
-    Myo* waitForAdjacentMyo(unsigned int timeout_ms = 0);
-
-    /// Initiate pairing with any nearby Myo.
-    /// Once pairing is initiated, run() must be called until a pairing event is received (via DeviceListener::onPair).
-    void pairWithAnyMyo();
-
-    /// Initiate pairing with the provided number of nearby Myos.
-    /// Once pairing is initiated, run() must be called until a pairing event is received (via DeviceListener::onPair).
-    void pairWithAnyMyos(unsigned int count);
-
-    /// Initiate pairing with a Myo that is physically very near to the Bluetooth radio.
-    /// Once pairing is initiated, run() must be called until a pairing event is received (via DeviceListener::onPair).
-    void pairWithAdjacentMyo();
-
-    /// Initiate pairing with one or more Myos that are physically very near to the Bluetooth radio.
-    /// Each Myo can be brought close to the Bluetooth radio one at a time.
-    /// Once pairing is initiated, run() must be called until a pairing event is received (via DeviceListener::onPair).
-    void pairWithAdjacentMyos(unsigned int count);
-
-    /// Initiate pairing with a Myo that has the given MAC address.
-    /// This is primarily useful for testing in an environment with multiple Myos, where you wish to connect to a
-    /// specific Myo.
-    void pairByMacAddress(uint64_t mac_address);
+    /// This function must not be called concurrently with run() or runOnce().
+    Myo* waitForMyo(unsigned int milliseconds = 0);
 
     /// Register a listener to be called when device events occur.
     void addListener(DeviceListener* listener);
@@ -69,9 +50,6 @@ public:
     /// Run the event loop until a single event occurs, or the specified duration (in milliseconds) has elapsed.
     void runOnce(unsigned int duration_ms);
 
-    /// Retrieve the current timestamp.
-    uint64_t now();
-
     /// @cond MYO_INTERNALS
 
     /// Return the internal libmyo object corresponding to this hub.
@@ -82,26 +60,21 @@ protected:
 
     Myo* lookupMyo(libmyo_myo_t opaqueMyo) const;
 
-    /// @endcond
+    Myo* addMyo(libmyo_myo_t opaqueMyo);
 
-private:
-    /// Wait for a Myo and pair with it, timing out if \a timeout_ms is set.
-    /// If \a timeout_ms is 0, block until paired with a Myo.
-    /// If \a adjacent is true, pair with a physically adjacent, rather than any, Myo.
-    Myo* waitForMyo(bool adjacent, unsigned int timeout_ms);
-
-    bool _withoutTrainingProfile;
     libmyo_hub_t _hub;
     std::vector<Myo*> _myos;
     std::vector<DeviceListener*> _listeners;
 
+    /// @endcond
+
+private:
     // Not implemented
     Hub(const Hub&);
     Hub& operator=(const Hub&);
 };
 
 /// @example hello-myo.cpp
-/// @example multiple-myos.cpp
 
 } // namespace myo
 

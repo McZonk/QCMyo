@@ -3,24 +3,10 @@
 #import "MYOHub.h"
 
 
-typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
-{
-	QCMyoPlugInPairingModeNone,
-	QCMyoPlugInPairingModeAny,
-	QCMyoPlugInPairingModeAdjacent,
-	QCMyoPlugInPairingModeMacAddress,
-};
-
-
 @interface QCMyoPlugIn ()
 
 @property (nonatomic, strong) MYOHub *hub;
 @property (nonatomic, strong) id<NSLocking> lock;
-
-@property (nonatomic, assign) QCMyoPlugInPairingMode pairingMode;
-@property (nonatomic, copy) NSString *paringMacAddress;
-
-@property (nonatomic, copy) NSString *trainingFilename;
 
 @property (nonatomic, strong) NSNumber *paired;
 @property (nonatomic, strong) NSNumber *connected;
@@ -54,16 +40,11 @@ typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
 
 @implementation QCMyoPlugIn
 
-@dynamic inputPairingMode;
-@dynamic inputPairingMacAddress;
-
 @dynamic inputVibration;
-@dynamic inputTrainingFilename;
 
 @dynamic outputPaired;
 @dynamic outputConnected;
 @dynamic outputTrained;
-@dynamic outputMacAddress;
 
 @dynamic outputOrientationX;
 @dynamic outputOrientationY;
@@ -100,32 +81,6 @@ typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
 
 + (NSDictionary *)attributesForPropertyPortWithKey:(NSString *)key
 {
-	if([key isEqualToString:@"inputPairingMode"])
-	{
-		return @{
-			QCPortAttributeNameKey: @"Paring Mode",
-			QCPortAttributeTypeKey: QCPortTypeIndex,
-			QCPortAttributeMinimumValueKey: @0,
-			QCPortAttributeMaximumValueKey: @3,
-			QCPortAttributeMenuItemsKey: @[
-				@"None",
-				@"Any",
-				@"Adjacent",
-				@"Mac Address",
-			],
-		};
-	}
-	
-	if([key isEqualToString:@"inputPairingMacAddress"])
-	{
-		return @{ QCPortAttributeNameKey: @"Pairing Mac Address" };
-	}
-	
-	if([key isEqualToString:@"inputTrainingFilename"])
-	{
-		return @{ QCPortAttributeNameKey: @"Training Filename" };
-	}
-	
 	if([key isEqualToString:@"inputVibration"])
 	{
 		return @{
@@ -155,10 +110,6 @@ typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
 	if([key isEqualToString:@"outputTrained"])
 	{
 		return @{ QCPortAttributeNameKey: @"Trained" };
-	}
-	if([key isEqualToString:@"outputMacAddress"])
-	{
-		return @{ QCPortAttributeNameKey: @"Mac Address" };
 	}
 	
 	// orientation
@@ -225,7 +176,7 @@ typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
 				@"Wave In",
 				@"Wave Out",
 				@"Fingers Spread",
-				@"Twist In"
+				@"Thumb To Pinky"
 			],
 		};
 	}
@@ -371,23 +322,6 @@ typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
 	id<NSLocking> lock = self.lock;
 	[lock lock];
 	
-	if([self didValueForInputKeyChange:@"inputPairingMacAddress"])
-	{
-		self.paringMacAddress = self.inputPairingMacAddress;
-	}
-	
-	if([self didValueForInputKeyChange:@"inputPairingMode"])
-	{
-		MYOHubPairingMode pairingMode = self.inputPairingMode;
-		[self.hub pairWithMode:pairingMode macAddress:self.paringMacAddress];
-	}
-
-	if([self didValueForInputKeyChange:@"inputTrainingFilename"])
-	{
-		NSString *trainingFilename = self.inputTrainingFilename;
-		[self.hub loadTrainingWithContentsOfPath:trainingFilename];
-	}
-	
 	if([self didValueForInputKeyChange:@"inputVibration"])
 	{
 		MYOHubVibrationType vibrationType = self.inputVibration - 1;
@@ -413,12 +347,6 @@ typedef NS_ENUM(NSUInteger, QCMyoPlugInPairingMode)
 	{
 		self.outputTrained = trained.boolValue;
 		self.trained = nil;
-	}
-	NSString *macAddress = self.macAddress;
-	if(macAddress != nil)
-	{
-		self.outputMacAddress = macAddress;
-		self.macAddress = nil;
 	}
 	
 	// orientation

@@ -1,9 +1,7 @@
 // Copyright (C) 2013-2014 Thalmic Labs Inc.
-// Confidential and not for redistribution. See LICENSE.txt.
+// Distributed under the Myo SDK license agreement. See LICENSE.txt for details.
 #ifndef MYO_CXX_MYO_HPP
 #define MYO_CXX_MYO_HPP
-
-#include <stdint.h>
 
 #include <myo/libmyo.h>
 
@@ -15,15 +13,6 @@ namespace myo {
 /// equal, they refer to the same device.
 class Myo {
 public:
-    /// Return the MAC address associated with this device.
-    uint64_t macAddress() const;
-
-    /// Return the MAC address associated with this device as a formatted hex string.
-    std::string macAddressAsString() const;
-
-    /// Returns true if and only if this Myo is trained and will generate pose events.
-    bool isTrained() const;
-
     /// Types of vibration supported by the Myo.
     enum VibrationType {
         vibrationShort  = libmyo_vibration_short,
@@ -50,7 +39,6 @@ private:
     ~Myo();
 
     libmyo_myo_t _myo;
-    bool _isTrained;
 
     // Not implemented.
     Myo(const Myo&);

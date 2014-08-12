@@ -100,7 +100,7 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 		if(usageCounter == 0)
 		{
 			libmyo_error_details_t error = NULL;
-			libmyo_result_t result = libmyo_init_hub(&hub, &error);
+			libmyo_result_t result = libmyo_init_hub(&hub, "QCMyo", &error);
 			if(result != libmyo_success)
 			{
 				NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
@@ -167,69 +167,6 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 	return success;
 }
 
-- (void)pairWithMode:(MYOHubPairingMode)pairingMode macAddress:(NSString *)macAddressString
-{
-	dispatch_async(queue, ^{
-		if(pairingMode == MYOHubPairingModeAny)
-		{
-			libmyo_error_details_t error = NULL;
-			libmyo_result_t result = libmyo_pair_any(hub, 1, &error);
-			if(result != libmyo_success)
-			{
-				NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
-				libmyo_free_error_details(error), error = NULL;
-			}
-		}
-		else if(pairingMode == MYOHubPairingModeAdjacent)
-		{
-			libmyo_error_details_t error = NULL;
-			libmyo_result_t result = libmyo_pair_any(hub, 1, &error);
-			if(result != libmyo_success)
-			{
-				NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
-				libmyo_free_error_details(error), error = NULL;
-			}
-		}
-		else if(pairingMode == MYOHubPairingModeMacAddress)
-		{
-			uint64 macAddress = libmyo_string_to_mac_address(macAddressString.UTF8String);
-			if(macAddress != 0)
-			{
-				libmyo_error_details_t error = NULL;
-				libmyo_result_t result = libmyo_pair_by_mac_address(hub, macAddress, &error);
-				if(result != libmyo_success)
-				{
-					NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
-					libmyo_free_error_details(error), error = NULL;
-				}
-			}
-		}
-	});
-}
-
-- (void)loadTrainingWithContentsOfPath:(NSString *)filename
-{
-	dispatch_async(queue, ^{
-		if(myo != NULL)
-		{
-			libmyo_error_details_t error = NULL;
-			libmyo_result_t result = libmyo_training_load_profile(myo, filename.length > 0 ? filename.UTF8String : NULL, &error);
-			if(result != libmyo_success)
-			{
-				NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
-				libmyo_free_error_details(error), error = NULL;
-			}
-			else
-			{
-				dispatch_async(dispatch_get_main_queue(), ^{
-					NSDictionary *userInfo = @{};
-					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidLoadTrainingProfileNotification object:self userInfo:userInfo];
-				});
-			}
-		}
-	});
-}
-
 - (void)vibrateWithType:(MYOHubVibrationType)vibration
 {
 	dispatch_async(queue, ^{
@@ -257,12 +194,6 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 			{
 				myo = libmyo_event_get_myo(event);
 				
-				{
-					uint64_t macAddress = libmyo_get_mac_address(myo);
-					libmyo_string_t macAddressString = libmyo_mac_address_to_string(macAddress);
-					self.macAddress = [NSString stringWithUTF8String:libmyo_string_c_str(macAddressString)];
-					libmyo_string_free(macAddressString), macAddressString = NULL;
-				}
 				break;
 			}
 				
@@ -273,8 +204,6 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidConnectMyoNotification object:self userInfo:userInfo];
 				});
 				
-				[self loadTrainingWithContentsOfPath:nil];
-
 				break;
 			}
 				

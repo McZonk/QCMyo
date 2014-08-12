@@ -3,17 +3,11 @@
 
 @interface QCMyoPlugIn : QCPlugIn
 
-@property (assign) NSUInteger inputPairingMode;
-@property (strong) NSString *inputPairingMacAddress;
-
-@property (strong) NSString *inputTrainingFilename;
 @property (assign) NSUInteger inputVibration;
 
 @property (assign) BOOL outputPaired;
 @property (assign) BOOL outputConnected;
 @property (assign) BOOL outputTrained;
-
-@property (strong) NSString *outputMacAddress;
 
 @property (assign) double outputOrientationX;
 @property (assign) double outputOrientationY;

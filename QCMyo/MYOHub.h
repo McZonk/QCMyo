@@ -32,7 +32,7 @@ typedef NS_ENUM(NSUInteger, MYOHubPose)
 	MYOHubPoseWaveIn = libmyo_pose_wave_in,
 	MYOHubPoseWaveOut = libmyo_pose_wave_out,
 	MYOHubPoseFingersSpread = libmyo_pose_fingers_spread,
-	MYOHubPoseTwistIn = libmyo_pose_twist_in,
+	MYOHubPoseThumbToPinky = libmyo_pose_thumb_to_pinky,
 };
 
 
@@ -70,10 +70,6 @@ extern NSString * MYOHubPoseKey;
 
 - (BOOL)setupWithError:(NSError **)error;
 - (BOOL)shutdown;
-
-- (void)pairWithMode:(MYOHubPairingMode)pairingMode macAddress:(NSString *)macAddressString;
-
-- (void)loadTrainingWithContentsOfPath:(NSString *)filename;
 
 - (void)vibrateWithType:(MYOHubVibrationType)vibration;
 
