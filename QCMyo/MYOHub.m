@@ -100,7 +100,7 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 		if(usageCounter == 0)
 		{
 			libmyo_error_details_t error = NULL;
-			libmyo_result_t result = libmyo_init_hub(&hub, "QCMyo", &error);
+			libmyo_result_t result = libmyo_init_hub(&hub, "de.mczonk.QCMyo", &error);
 			if(result != libmyo_success)
 			{
 				NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
