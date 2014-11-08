@@ -114,7 +114,6 @@
 				5006EAC3196C5F0800EAEE20 /* Frameworks */,
 				507CA531196DCF5F003EA8F7 /* CopyFiles */,
 				507CA532196DCFCC003EA8F7 /* Copy Frameworks */,
-				5006EAC5196C5F0800EAEE20 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -155,23 +154,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		5006EAC5196C5F0800EAEE20 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 12;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# This shell script simply copies the built plug-in to \"~/Library/Graphics/Quartz Composer Plug-Ins\" and overrides any previous version at that location\n\nmkdir -p \"$USER_LIBRARY_DIR/Graphics/Quartz Composer Plug-Ins\"\nrm -rf \"$USER_LIBRARY_DIR/Graphics/Quartz Composer Plug-Ins/QCMyo.plugin\"\ncp -rf \"$BUILT_PRODUCTS_DIR/QCMyo.plugin\" \"$USER_LIBRARY_DIR/Graphics/Quartz Composer Plug-Ins/\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		5006EAC2196C5F0800EAEE20 /* Sources */ = {
