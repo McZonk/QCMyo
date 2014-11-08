@@ -58,6 +58,7 @@
 @dynamic outputGyroscopeY;
 @dynamic outputGyroscopeZ;
 
+@dynamic outputArm;
 @dynamic outputPose;
 
 
@@ -208,6 +209,8 @@
 	BOOL success = [hub setupWithError:nil];
 	if(success)
 	{
+		self.arm = @(MYOHubArmUnknown);
+		
 		NSNotificationCenter *notificationCenter = NSNotificationCenter.defaultCenter;
 		
 		__weak typeof(self) weakSelf = self;
@@ -247,7 +250,7 @@
 			[lock unlock];
 		}];
 		
-		self.armObserver = [notificationCenter addObserverForName:MYOHubDidDisconnectMyoNotification object:hub queue:nil usingBlock:^(NSNotification *notification) {
+		self.armObserver = [notificationCenter addObserverForName:MYOHubDidArmDidChangeNotification object:hub queue:nil usingBlock:^(NSNotification *notification) {
 			typeof(self) self = weakSelf;
 
 			NSDictionary *userInfo = notification.userInfo;
