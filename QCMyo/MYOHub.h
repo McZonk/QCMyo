@@ -11,13 +11,6 @@
 #import <myo/libmyo.h>
 
 
-typedef NS_ENUM(NSUInteger, MYOHubPairingMode)
-{
-	MYOHubPairingModeAny,
-	MYOHubPairingModeAdjacent,
-	MYOHubPairingModeMacAddress,
-};
-
 typedef NS_ENUM(NSUInteger, MYOHubVibrationType)
 {
 	MYOHubVibrationTypeShort = libmyo_vibration_short,
