@@ -19,7 +19,7 @@ NSString * const MYOHubDidReceiveOrientationData = @"MYOHubDidReceiveOrientation
 NSString * const MYOHubDidReceiveAccelerometerData = @"MYOHubDidReceiveAccelerometerData";
 NSString * const MYOHubDidReceiveGyroscopeData = @"MYOHubDidReceiveGyroscopeData";
 
-NSString * const MYOHubDidRecognizePose = @"MYOHubDidRecognizePose";
+NSString * const MYOHubDidRecognizePoseNotification = @"MYOHubDidRecognizePoseNotification";
 
 NSString * const MYOHubOrientationXKey = @"x";
 NSString * const MYOHubOrientationYKey = @"y";
@@ -240,16 +240,10 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 			{
 				libmyo_arm_t arm = libmyo_event_get_arm(event);
 				
-				NSMutableDictionary *userInfo = nil;
-				if(arm == libmyo_arm_right)
-				{
-					userInfo[MYOHubArmKey] = MYOHubRightArmValue;
-				}
-				else if(arm == libmyo_arm_left)
-				{
-					userInfo[MYOHubArmKey] = MYOHubLeftArmValue;
-				}
-				
+				NSDictionary *userInfo = @{
+					MYOHubArmKey: @(arm),
+				};
+
 				dispatch_async(dispatch_get_main_queue(), ^{
 					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidArmDidChangeNotification object:self userInfo:userInfo];
 				});
@@ -259,8 +253,12 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 				
 			case libmyo_event_arm_lost:
 			{
+				NSDictionary *userInfo = @{
+					MYOHubArmKey: @(MYOHubArmUnknown),
+				};
+				
 				dispatch_async(dispatch_get_main_queue(), ^{
-					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidArmDidChangeNotification object:self userInfo:nil];
+					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidArmDidChangeNotification object:self userInfo:userInfo];
 				});
 				
 				break;
@@ -316,7 +314,7 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 					NSDictionary *userInfo = @{
 						MYOHubPoseKey: @(pose),
 					};
-					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidRecognizePose object:self userInfo:userInfo];
+					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidRecognizePoseNotification object:self userInfo:userInfo];
 				});
 				
 				break;

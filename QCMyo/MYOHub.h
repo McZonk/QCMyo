@@ -25,6 +25,13 @@ typedef NS_ENUM(NSUInteger, MYOHubVibrationType)
 	MYOHubVibrationTypeLong = libmyo_vibration_long,
 };
 
+typedef NS_ENUM(NSUInteger, MYOHubArm)
+{
+	MYOHubArmRight = libmyo_arm_right,
+	MYOHubArmLeft = libmyo_arm_left,
+	MYOHubArmUnknown = libmyo_arm_unknown,
+};
+
 typedef NS_ENUM(NSUInteger, MYOHubPose)
 {
 	MYOHubPoseRest = libmyo_pose_rest,
@@ -45,14 +52,10 @@ extern NSString * const MYOHubDidDisconnectMyoNotification;
 extern NSString * const MYOHubDidArmDidChangeNotification;
 
 extern NSString * const MYOHubArmKey;
-extern NSString * const MYOHubRightArmValue;
-extern NSString * const MYOHubLeftArmValue;
 
 extern NSString * const MYOHubDidReceiveOrientationData;
 extern NSString * const MYOHubDidReceiveAccelerometerData;
 extern NSString * const MYOHubDidReceiveGyroscopeData;
-
-extern NSString * const MYOHubDidRecognizePose;
 
 extern NSString * const MYOHubOrientationXKey;
 extern NSString * const MYOHubOrientationYKey;
@@ -66,6 +69,8 @@ extern NSString * const MYOHubAccelerometerDataZKey;
 extern NSString * const MYOHubGyroscopeDataXKey;
 extern NSString * const MYOHubGyroscopeDataYKey;
 extern NSString * const MYOHubGyroscopeDataZKey;
+
+extern NSString * const MYOHubDidRecognizePoseNotification;
 
 extern NSString * const MYOHubPoseKey;
 

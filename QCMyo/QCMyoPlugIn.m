@@ -25,7 +25,7 @@
 @property (nonatomic, strong) NSNumber *gyroscopeY;
 @property (nonatomic, strong) NSNumber *gyroscopeZ;
 
-@property (nonatomic, strong) NSString *arm;
+@property (nonatomic, strong) NSNumber *arm;
 @property (nonatomic, strong) NSNumber *pose;
 
 @property (weak) id pairedObserver;
@@ -112,7 +112,10 @@
 	
 	if([key isEqualToString:@"outputArm"])
 	{
-		return @{ QCPortAttributeNameKey: @"Arm" };
+		return @{
+			QCPortAttributeNameKey: @"Arm",
+			QCPortAttributeTypeKey: QCPortTypeIndex,
+		};
 	}
 	
 	// orientation
@@ -171,16 +174,6 @@
 		return @{
 			QCPortAttributeNameKey: @"Pose",
 			QCPortAttributeTypeKey: QCPortTypeIndex,
-			QCPortAttributeMinimumValueKey: @0,
-			QCPortAttributeMaximumValueKey: @(libmyo_num_poses-1),
-			QCPortAttributeMenuItemsKey: @[
-				@"Rest",
-				@"Fist",
-				@"Wave In",
-				@"Wave Out",
-				@"Fingers Spread",
-				@"Thumb To Pinky"
-			],
 		};
 	}
 
@@ -260,10 +253,10 @@
 
 			NSDictionary *userInfo = notification.userInfo;
 			
-			NSString *arm = userInfo[MYOHubArmKey];
+			NSNumber *arm = userInfo[MYOHubArmKey];
 			if(arm == nil)
 			{
-				arm = @"";
+				arm = @(MYOHubArmUnknown);
 			}
 			
 			id<NSLocking> lock = self.lock;
@@ -286,7 +279,7 @@
 			[lock unlock];
 		}];
 		
-		self.poseObserver = [notificationCenter addObserverForName:MYOHubDidRecognizePose object:hub queue:nil usingBlock:^(NSNotification *notification) {
+		self.poseObserver = [notificationCenter addObserverForName:MYOHubDidRecognizePoseNotification object:hub queue:nil usingBlock:^(NSNotification *notification) {
 			typeof(self) self = weakSelf;
 
 			NSDictionary *userInfo = notification.userInfo;
@@ -316,6 +309,9 @@
 	id disconnectObserver = self.disconnectObserver;
 	[notificationCenter removeObserver:disconnectObserver];
 
+	id armObserver = self.armObserver;
+	[notificationCenter removeObserver:armObserver];
+	
 	id orientationObserver = self.orientationObserver;
 	[notificationCenter removeObserver:orientationObserver];
 
@@ -363,10 +359,10 @@
 	
 	// arm
 	
-	NSString *arm = self.arm;
+	NSNumber *arm = self.arm;
 	if(arm != nil)
 	{
-		self.outputArm = arm;
+		self.outputArm = arm.unsignedIntegerValue;
 		self.arm = nil;
 	}
 	
