@@ -10,7 +10,6 @@
 
 @property (nonatomic, strong) NSNumber *paired;
 @property (nonatomic, strong) NSNumber *connected;
-@property (nonatomic, strong) NSString *macAddress;
 
 @property (nonatomic, strong) NSNumber *orientationX;
 @property (nonatomic, strong) NSNumber *orientationY;

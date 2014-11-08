@@ -47,8 +47,6 @@ NSString * const MYOHubPoseKey = @"Pose";
 
 @property (assign) BOOL stopRunning;
 
-@property (strong) NSString *macAddress;
-
 - (void)handleEvent:(libmyo_event_t)event;
 
 @end
