@@ -36,38 +36,38 @@ typedef NS_ENUM(NSUInteger, MYOHubPose)
 };
 
 
-extern NSString * MYOHubDidPairNotification;
-extern NSString * MYOHubDidUnpairNotification;
+extern NSString * const MYOHubDidPairNotification;
+extern NSString * const MYOHubDidUnpairNotification;
 
-extern NSString * MYOHubDidConnectMyoNotification;
-extern NSString * MYOHubDidDisconnectMyoNotification;
+extern NSString * const MYOHubDidConnectMyoNotification;
+extern NSString * const MYOHubDidDisconnectMyoNotification;
 
-extern NSString * MYOHubDidArmDidChangeNotification;
+extern NSString * const MYOHubDidArmDidChangeNotification;
 
-extern NSString * MYOHubArmKey;
-extern NSString * MYOHubRightArmValue;
-extern NSString * MYOHubLeftArmValue;
+extern NSString * const MYOHubArmKey;
+extern NSString * const MYOHubRightArmValue;
+extern NSString * const MYOHubLeftArmValue;
 
-extern NSString * MYOHubDidReceiveOrientationData;
-extern NSString * MYOHubDidReceiveAccelerometerData;
-extern NSString * MYOHubDidReceiveGyroscopeData;
+extern NSString * const MYOHubDidReceiveOrientationData;
+extern NSString * const MYOHubDidReceiveAccelerometerData;
+extern NSString * const MYOHubDidReceiveGyroscopeData;
 
-extern NSString * MYOHubDidRecognizePose;
+extern NSString * const MYOHubDidRecognizePose;
 
-extern NSString * MYOHubOrientationXKey;
-extern NSString * MYOHubOrientationYKey;
-extern NSString * MYOHubOrientationZKey;
-extern NSString * MYOHubOrientationWKey;
+extern NSString * const MYOHubOrientationXKey;
+extern NSString * const MYOHubOrientationYKey;
+extern NSString * const MYOHubOrientationZKey;
+extern NSString * const MYOHubOrientationWKey;
 
-extern NSString * MYOHubAccelerometerDataXKey;
-extern NSString * MYOHubAccelerometerDataYKey;
-extern NSString * MYOHubAccelerometerDataZKey;
+extern NSString * const MYOHubAccelerometerDataXKey;
+extern NSString * const MYOHubAccelerometerDataYKey;
+extern NSString * const MYOHubAccelerometerDataZKey;
 
-extern NSString * MYOHubGyroscopeDataXKey;
-extern NSString * MYOHubGyroscopeDataYKey;
-extern NSString * MYOHubGyroscopeDataZKey;
+extern NSString * const MYOHubGyroscopeDataXKey;
+extern NSString * const MYOHubGyroscopeDataYKey;
+extern NSString * const MYOHubGyroscopeDataZKey;
 
-extern NSString * MYOHubPoseKey;
+extern NSString * const MYOHubPoseKey;
 
 
 @interface MYOHub : NSObject

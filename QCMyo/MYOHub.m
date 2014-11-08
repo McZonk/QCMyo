@@ -3,38 +3,38 @@
 #import <myo/libmyo.h>
 
 
-NSString * MYOHubDidPairNotification = @"MYOHubDidPairNotification";
-NSString * MYOHubDidUnpairNotification = @"MYOHubDidUnpairNotification";
+NSString * const MYOHubDidPairNotification = @"MYOHubDidPairNotification";
+NSString * const MYOHubDidUnpairNotification = @"MYOHubDidUnpairNotification";
 
-NSString * MYOHubDidConnectMyoNotification = @"MYOHubDidConnectMyoNotification";
-NSString * MYOHubDidDisconnectMyoNotification = @"MYOHubDidDisconnectMyoNotification";
+NSString * const MYOHubDidConnectMyoNotification = @"MYOHubDidConnectMyoNotification";
+NSString * const MYOHubDidDisconnectMyoNotification = @"MYOHubDidDisconnectMyoNotification";
 
-NSString * MYOHubDidArmDidChangeNotification = @"MYOHubDidArmDidChangeNotification";
+NSString * const MYOHubDidArmDidChangeNotification = @"MYOHubDidArmDidChangeNotification";
 
-NSString * MYOHubArmKey = @"arm";
-NSString * MYOHubRightArmValue = @"right";
-NSString * MYOHubLeftArmValue = @"left";
+NSString * const MYOHubArmKey = @"arm";
+NSString * const MYOHubRightArmValue = @"right";
+NSString * const MYOHubLeftArmValue = @"left";
 
-NSString * MYOHubDidReceiveOrientationData = @"MYOHubDidReceiveOrientationData";
-NSString * MYOHubDidReceiveAccelerometerData = @"MYOHubDidReceiveAccelerometerData";
-NSString * MYOHubDidReceiveGyroscopeData = @"MYOHubDidReceiveGyroscopeData";
+NSString * const MYOHubDidReceiveOrientationData = @"MYOHubDidReceiveOrientationData";
+NSString * const MYOHubDidReceiveAccelerometerData = @"MYOHubDidReceiveAccelerometerData";
+NSString * const MYOHubDidReceiveGyroscopeData = @"MYOHubDidReceiveGyroscopeData";
 
-NSString * MYOHubDidRecognizePose = @"MYOHubDidRecognizePose";
+NSString * const MYOHubDidRecognizePose = @"MYOHubDidRecognizePose";
 
-NSString * MYOHubOrientationXKey = @"x";
-NSString * MYOHubOrientationYKey = @"y";
-NSString * MYOHubOrientationZKey = @"z";
-NSString * MYOHubOrientationWKey = @"w";
+NSString * const MYOHubOrientationXKey = @"x";
+NSString * const MYOHubOrientationYKey = @"y";
+NSString * const MYOHubOrientationZKey = @"z";
+NSString * const MYOHubOrientationWKey = @"w";
 
-NSString * MYOHubAccelerometerDataXKey = @"x";
-NSString * MYOHubAccelerometerDataYKey = @"y";
-NSString * MYOHubAccelerometerDataZKey = @"z";
+NSString * const MYOHubAccelerometerDataXKey = @"x";
+NSString * const MYOHubAccelerometerDataYKey = @"y";
+NSString * const MYOHubAccelerometerDataZKey = @"z";
 
-NSString * MYOHubGyroscopeDataXKey = @"x";
-NSString * MYOHubGyroscopeDataYKey = @"y";
-NSString * MYOHubGyroscopeDataZKey = @"z";
+NSString * const MYOHubGyroscopeDataXKey = @"x";
+NSString * const MYOHubGyroscopeDataYKey = @"y";
+NSString * const MYOHubGyroscopeDataZKey = @"z";
 
-NSString * MYOHubPoseKey = @"Pose";
+NSString * const MYOHubPoseKey = @"Pose";
 
 
 
