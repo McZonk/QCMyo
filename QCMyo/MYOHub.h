@@ -46,9 +46,7 @@ extern NSString * const MYOHubDidArmDidChangeNotification;
 
 extern NSString * const MYOHubArmKey;
 
-extern NSString * const MYOHubDidReceiveOrientationData;
-extern NSString * const MYOHubDidReceiveAccelerometerData;
-extern NSString * const MYOHubDidReceiveGyroscopeData;
+extern NSString * const MYOHubDidReceiveOrientationDataNotification;
 
 extern NSString * const MYOHubOrientationXKey;
 extern NSString * const MYOHubOrientationYKey;

@@ -265,7 +265,7 @@
 			[lock unlock];
 		}];
 
-		self.orientationObserver = [notificationCenter addObserverForName:MYOHubDidReceiveOrientationData object:hub queue:nil usingBlock:^(NSNotification *notification) {
+		self.orientationObserver = [notificationCenter addObserverForName:MYOHubDidReceiveOrientationDataNotification object:hub queue:nil usingBlock:^(NSNotification *notification) {
 			typeof(self) self = weakSelf;
 			
 			NSDictionary *userInfo = notification.userInfo;
@@ -276,6 +276,12 @@
 			self.orientationY = userInfo[MYOHubOrientationYKey];
 			self.orientationZ = userInfo[MYOHubOrientationZKey];
 			self.orientationW = userInfo[MYOHubOrientationWKey];
+			self.accelerometerX = userInfo[MYOHubAccelerometerDataXKey];
+			self.accelerometerY = userInfo[MYOHubAccelerometerDataYKey];
+			self.accelerometerZ = userInfo[MYOHubAccelerometerDataZKey];
+			self.gyroscopeX = userInfo[MYOHubGyroscopeDataXKey];
+			self.gyroscopeY = userInfo[MYOHubGyroscopeDataYKey];
+			self.gyroscopeZ = userInfo[MYOHubGyroscopeDataZKey];
 			[lock unlock];
 		}];
 		

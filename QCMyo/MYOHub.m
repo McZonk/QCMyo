@@ -12,27 +12,23 @@ NSString * const MYOHubDidDisconnectMyoNotification = @"MYOHubDidDisconnectMyoNo
 NSString * const MYOHubDidArmDidChangeNotification = @"MYOHubDidArmDidChangeNotification";
 
 NSString * const MYOHubArmKey = @"arm";
-NSString * const MYOHubRightArmValue = @"right";
-NSString * const MYOHubLeftArmValue = @"left";
 
-NSString * const MYOHubDidReceiveOrientationData = @"MYOHubDidReceiveOrientationData";
-NSString * const MYOHubDidReceiveAccelerometerData = @"MYOHubDidReceiveAccelerometerData";
-NSString * const MYOHubDidReceiveGyroscopeData = @"MYOHubDidReceiveGyroscopeData";
+NSString * const MYOHubDidReceiveOrientationDataNotification = @"MYOHubDidReceiveOrientationDataNotification";
 
 NSString * const MYOHubDidRecognizePoseNotification = @"MYOHubDidRecognizePoseNotification";
 
-NSString * const MYOHubOrientationXKey = @"x";
-NSString * const MYOHubOrientationYKey = @"y";
-NSString * const MYOHubOrientationZKey = @"z";
-NSString * const MYOHubOrientationWKey = @"w";
+NSString * const MYOHubOrientationXKey = @"orientationX";
+NSString * const MYOHubOrientationYKey = @"orientationY";
+NSString * const MYOHubOrientationZKey = @"orientationZ";
+NSString * const MYOHubOrientationWKey = @"orientationW";
 
-NSString * const MYOHubAccelerometerDataXKey = @"x";
-NSString * const MYOHubAccelerometerDataYKey = @"y";
-NSString * const MYOHubAccelerometerDataZKey = @"z";
+NSString * const MYOHubAccelerometerDataXKey = @"accelerometerX";
+NSString * const MYOHubAccelerometerDataYKey = @"accelerometerY";
+NSString * const MYOHubAccelerometerDataZKey = @"accelerometerZ";
 
-NSString * const MYOHubGyroscopeDataXKey = @"x";
-NSString * const MYOHubGyroscopeDataYKey = @"y";
-NSString * const MYOHubGyroscopeDataZKey = @"z";
+NSString * const MYOHubGyroscopeDataXKey = @"gyroscopeX";
+NSString * const MYOHubGyroscopeDataYKey = @"gyroscopeY";
+NSString * const MYOHubGyroscopeDataZKey = @"gyroscopeZ";
 
 NSString * const MYOHubPoseKey = @"Pose";
 
@@ -285,22 +281,14 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 						MYOHubOrientationYKey: @(orientationY),
 						MYOHubOrientationZKey: @(orientationZ),
 						MYOHubOrientationWKey: @(orientationW),
-					};
-					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidReceiveOrientationData object:self userInfo:orientationUserInfo];
-					
-					NSDictionary *accelerometerUserInfo = @{
 						MYOHubAccelerometerDataXKey: @(accelerometerX),
 						MYOHubAccelerometerDataYKey: @(accelerometerY),
 						MYOHubAccelerometerDataZKey: @(accelerometerZ),
-					};
-					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidReceiveAccelerometerData object:self userInfo:accelerometerUserInfo];
-					
-					NSDictionary *gyroscopeUserInfo = @{
 						MYOHubGyroscopeDataXKey: @(gyroscopeX),
 						MYOHubGyroscopeDataYKey: @(gyroscopeY),
 						MYOHubGyroscopeDataZKey: @(gyroscopeZ),
 					};
-					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidReceiveGyroscopeData object:self userInfo:gyroscopeUserInfo];
+					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidReceiveOrientationDataNotification object:self userInfo:orientationUserInfo];
 				});
 				
 				break;
