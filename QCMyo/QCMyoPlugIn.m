@@ -10,7 +10,6 @@
 
 @property (nonatomic, strong) NSNumber *paired;
 @property (nonatomic, strong) NSNumber *connected;
-@property (nonatomic, strong) NSNumber *trained;
 @property (nonatomic, strong) NSString *macAddress;
 
 @property (nonatomic, strong) NSNumber *orientationX;
@@ -29,7 +28,7 @@
 @property (nonatomic, strong) NSNumber *pose;
 
 @property (weak) id pairedObserver;
-@property (weak) id trainedObserver;
+@property (weak) id unpairedObserver;
 @property (weak) id connectedObserver;
 @property (weak) id disconnectObserver;
 @property (weak) id orientationObserver;
@@ -44,7 +43,6 @@
 
 @dynamic outputPaired;
 @dynamic outputConnected;
-@dynamic outputTrained;
 
 @dynamic outputOrientationX;
 @dynamic outputOrientationY;
@@ -106,10 +104,6 @@
 	if([key isEqualToString:@"outputConnected"])
 	{
 		return @{ QCPortAttributeNameKey: @"Connected" };
-	}
-	if([key isEqualToString:@"outputTrained"])
-	{
-		return @{ QCPortAttributeNameKey: @"Trained" };
 	}
 	
 	// orientation
@@ -225,12 +219,12 @@
 			[lock unlock];
 		}];
 		
-		self.trainedObserver = [notificationCenter addObserverForName:MYOHubDidLoadTrainingProfileNotification object:hub queue:nil usingBlock:^(NSNotification *notification) {
+		self.unpairedObserver = [notificationCenter addObserverForName:MYOHubDidUnpairNotification object:hub queue:nil usingBlock:^(NSNotification *notifiction) {
 			typeof(self) self = weakSelf;
 			
 			id<NSLocking> lock = self.lock;
 			[lock lock];
-			self.trained = @YES;
+			self.paired = @NO;
 			[lock unlock];
 		}];
 
@@ -248,9 +242,7 @@
 			
 			id<NSLocking> lock = self.lock;
 			[lock lock];
-			self.trained = @NO;
 			self.connected = @NO;
-			self.paired = @NO;
 			[lock unlock];
 		}];
 
@@ -289,8 +281,8 @@
 	id pairedObserver = self.pairedObserver;
 	[notificationCenter removeObserver:pairedObserver];
 	
-	id trainedObserver = self.trainedObserver;
-	[notificationCenter removeObserver:trainedObserver];
+	id unpairedObserver = self.unpairedObserver;
+	[notificationCenter removeObserver:unpairedObserver];
 
 	id connectedObserver = self.connectedObserver;
 	[notificationCenter removeObserver:connectedObserver];
@@ -341,12 +333,6 @@
 	{
 		self.outputConnected = connected.boolValue;
 		self.connected = nil;
-	}
-	NSNumber *trained = self.trained;
-	if(trained != nil)
-	{
-		self.outputTrained = trained.boolValue;
-		self.trained = nil;
 	}
 	
 	// orientation

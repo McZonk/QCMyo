@@ -37,7 +37,7 @@ typedef NS_ENUM(NSUInteger, MYOHubPose)
 
 
 extern NSString * MYOHubDidPairNotification;
-extern NSString * MYOHubDidLoadTrainingProfileNotification;
+extern NSString * MYOHubDidUnpairNotification;
 
 extern NSString * MYOHubDidConnectMyoNotification;
 extern NSString * MYOHubDidDisconnectMyoNotification;

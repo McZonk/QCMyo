@@ -7,7 +7,6 @@
 
 @property (assign) BOOL outputPaired;
 @property (assign) BOOL outputConnected;
-@property (assign) BOOL outputTrained;
 
 @property (assign) double outputOrientationX;
 @property (assign) double outputOrientationY;

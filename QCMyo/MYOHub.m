@@ -4,7 +4,7 @@
 
 
 NSString * MYOHubDidPairNotification = @"MYOHubDidPairNotification";
-NSString * MYOHubDidLoadTrainingProfileNotification = @"MYOHubDidLoadTrainingProfileNotification";
+NSString * MYOHubDidUnpairNotification = @"MYOHubDidUnpairNotification";
 
 NSString * MYOHubDidConnectMyoNotification = @"MYOHubDidConnectMyoNotification";
 NSString * MYOHubDidDisconnectMyoNotification = @"MYOHubDidDisconnectMyoNotification";
@@ -194,14 +194,28 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 			{
 				myo = libmyo_event_get_myo(event);
 				
+				dispatch_async(dispatch_get_main_queue(), ^{
+					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidPairNotification object:self userInfo:nil];
+				});
+				
 				break;
 			}
 				
+			case libmyo_event_unpaired:
+			{
+				myo = NULL;
+				
+				dispatch_async(dispatch_get_main_queue(), ^{
+					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidUnpairNotification object:self userInfo:nil];
+				});
+				
+				break;
+			}
+			
 			case libmyo_event_connected:
 			{
 				dispatch_async(dispatch_get_main_queue(), ^{
-					NSDictionary *userInfo = @{};
-					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidConnectMyoNotification object:self userInfo:userInfo];
+					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidConnectMyoNotification object:self userInfo:nil];
 				});
 				
 				break;
@@ -210,8 +224,7 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 			case libmyo_event_disconnected:
 			{
 				dispatch_async(dispatch_get_main_queue(), ^{
-					NSDictionary *userInfo = @{};
-					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidDisconnectMyoNotification object:self userInfo:userInfo];
+					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidDisconnectMyoNotification object:self userInfo:nil];
 				});
 				
 				break;
