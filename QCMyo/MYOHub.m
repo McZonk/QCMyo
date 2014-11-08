@@ -163,7 +163,7 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 		{
 			usageCounter -= 1;
 			
-			if(usageCounter > 0)
+			if(usageCounter == 0)
 			{
 				self.stopRunning = YES;
 			}
