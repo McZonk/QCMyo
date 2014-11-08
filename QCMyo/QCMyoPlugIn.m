@@ -25,6 +25,7 @@
 @property (nonatomic, strong) NSNumber *gyroscopeY;
 @property (nonatomic, strong) NSNumber *gyroscopeZ;
 
+@property (nonatomic, strong) NSString *arm;
 @property (nonatomic, strong) NSNumber *pose;
 
 @property (weak) id pairedObserver;
@@ -32,6 +33,7 @@
 @property (weak) id connectedObserver;
 @property (weak) id disconnectObserver;
 @property (weak) id orientationObserver;
+@property (weak) id armObserver;
 @property (weak) id poseObserver;
 
 @end
@@ -104,6 +106,13 @@
 	if([key isEqualToString:@"outputConnected"])
 	{
 		return @{ QCPortAttributeNameKey: @"Connected" };
+	}
+	
+	// arm
+	
+	if([key isEqualToString:@"outputArm"])
+	{
+		return @{ QCPortAttributeNameKey: @"Arm" };
 	}
 	
 	// orientation
@@ -245,6 +254,23 @@
 			self.connected = @NO;
 			[lock unlock];
 		}];
+		
+		self.armObserver = [notificationCenter addObserverForName:MYOHubDidDisconnectMyoNotification object:hub queue:nil usingBlock:^(NSNotification *notification) {
+			typeof(self) self = weakSelf;
+
+			NSDictionary *userInfo = notification.userInfo;
+			
+			NSString *arm = userInfo[MYOHubArmKey];
+			if(arm == nil)
+			{
+				arm = @"";
+			}
+			
+			id<NSLocking> lock = self.lock;
+			[lock lock];
+			self.arm = arm;
+			[lock unlock];
+		}];
 
 		self.orientationObserver = [notificationCenter addObserverForName:MYOHubDidReceiveOrientationData object:hub queue:nil usingBlock:^(NSNotification *notification) {
 			typeof(self) self = weakSelf;
@@ -333,6 +359,15 @@
 	{
 		self.outputConnected = connected.boolValue;
 		self.connected = nil;
+	}
+	
+	// arm
+	
+	NSString *arm = self.arm;
+	if(arm != nil)
+	{
+		self.outputArm = arm;
+		self.arm = nil;
 	}
 	
 	// orientation

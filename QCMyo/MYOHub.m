@@ -9,6 +9,12 @@ NSString * MYOHubDidUnpairNotification = @"MYOHubDidUnpairNotification";
 NSString * MYOHubDidConnectMyoNotification = @"MYOHubDidConnectMyoNotification";
 NSString * MYOHubDidDisconnectMyoNotification = @"MYOHubDidDisconnectMyoNotification";
 
+NSString * MYOHubDidArmDidChangeNotification = @"MYOHubDidArmDidChangeNotification";
+
+NSString * MYOHubArmKey = @"arm";
+NSString * MYOHubRightArmValue = @"right";
+NSString * MYOHubLeftArmValue = @"left";
+
 NSString * MYOHubDidReceiveOrientationData = @"MYOHubDidReceiveOrientationData";
 NSString * MYOHubDidReceiveAccelerometerData = @"MYOHubDidReceiveAccelerometerData";
 NSString * MYOHubDidReceiveGyroscopeData = @"MYOHubDidReceiveGyroscopeData";
@@ -225,6 +231,36 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 			{
 				dispatch_async(dispatch_get_main_queue(), ^{
 					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidDisconnectMyoNotification object:self userInfo:nil];
+				});
+				
+				break;
+			}
+				
+			case libmyo_event_arm_recognized:
+			{
+				libmyo_arm_t arm = libmyo_event_get_arm(event);
+				
+				NSMutableDictionary *userInfo = nil;
+				if(arm == libmyo_arm_right)
+				{
+					userInfo[MYOHubArmKey] = MYOHubRightArmValue;
+				}
+				else if(arm == libmyo_arm_left)
+				{
+					userInfo[MYOHubArmKey] = MYOHubLeftArmValue;
+				}
+				
+				dispatch_async(dispatch_get_main_queue(), ^{
+					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidArmDidChangeNotification object:self userInfo:userInfo];
+				});
+				
+				break;
+			}
+				
+			case libmyo_event_arm_lost:
+			{
+				dispatch_async(dispatch_get_main_queue(), ^{
+					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidArmDidChangeNotification object:self userInfo:nil];
 				});
 				
 				break;

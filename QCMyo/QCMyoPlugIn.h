@@ -21,6 +21,7 @@
 @property (assign) double outputGyroscopeY;
 @property (assign) double outputGyroscopeZ;
 
+@property (assign) NSString * outputArm;
 @property (assign) NSUInteger outputPose;
 
 @end

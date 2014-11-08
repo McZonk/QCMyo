@@ -42,6 +42,12 @@ extern NSString * MYOHubDidUnpairNotification;
 extern NSString * MYOHubDidConnectMyoNotification;
 extern NSString * MYOHubDidDisconnectMyoNotification;
 
+extern NSString * MYOHubDidArmDidChangeNotification;
+
+extern NSString * MYOHubArmKey;
+extern NSString * MYOHubRightArmValue;
+extern NSString * MYOHubLeftArmValue;
+
 extern NSString * MYOHubDidReceiveOrientationData;
 extern NSString * MYOHubDidReceiveAccelerometerData;
 extern NSString * MYOHubDidReceiveGyroscopeData;
