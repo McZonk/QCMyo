@@ -45,6 +45,9 @@
 		5006EACD196C5F0800EAEE20 /* QCMyoPlugIn.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QCMyoPlugIn.m; sourceTree = "<group>"; };
 		507CA52A196DCBF5003EA8F7 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
 		507CA52C196DCBFB003EA8F7 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		50D0828E1A100D6A00C33472 /* BuildNumber.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = BuildNumber.xcconfig; sourceTree = "<group>"; };
+		50D0828F1A100D6A00C33472 /* Project.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Project.xcconfig; sourceTree = "<group>"; };
+		50D082911A100D7700C33472 /* UpdateBuildNumber.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = UpdateBuildNumber.sh; sourceTree = "<group>"; };
 		50DE8C8B197044AA00B6EAFA /* myo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = myo.framework; path = QCMyo/myo.framework; sourceTree = "<group>"; };
 		50DF487F19706F43000B078B /* MYOHub.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MYOHub.h; sourceTree = "<group>"; };
 		50DF488019706F43000B078B /* MYOHub.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MYOHub.m; sourceTree = "<group>"; };
@@ -67,7 +70,9 @@
 		5006EABD196C5F0800EAEE20 = {
 			isa = PBXGroup;
 			children = (
+				50D0828D1A100D6A00C33472 /* Config */,
 				5006EAC9196C5F0800EAEE20 /* QCMyo */,
+				50D082901A100D7700C33472 /* Scripts */,
 				507CA52E196DCC37003EA8F7 /* Frameworks */,
 				5006EAC8196C5F0800EAEE20 /* Products */,
 			);
@@ -101,6 +106,23 @@
 				507CA52A196DCBF5003EA8F7 /* Quartz.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		50D0828D1A100D6A00C33472 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				50D0828E1A100D6A00C33472 /* BuildNumber.xcconfig */,
+				50D0828F1A100D6A00C33472 /* Project.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		50D082901A100D7700C33472 /* Scripts */ = {
+			isa = PBXGroup;
+			children = (
+				50D082911A100D7700C33472 /* UpdateBuildNumber.sh */,
+			);
+			path = Scripts;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -170,6 +192,7 @@
 /* Begin XCBuildConfiguration section */
 		5006EACF196C5F0800EAEE20 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 50D0828F1A100D6A00C33472 /* Project.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -215,6 +238,7 @@
 		};
 		5006EAD0196C5F0800EAEE20 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 50D0828F1A100D6A00C33472 /* Project.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";

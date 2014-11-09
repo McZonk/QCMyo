@@ -15,11 +15,11 @@
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.1</string>
+	<string>${QCMYO_VERSION}</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>${QCMYO_BUILD_NUMBER}</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2014 McZonk. All rights reserved.</string>
 	<key>QCPlugInClasses</key>
