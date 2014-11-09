@@ -25,6 +25,7 @@
 @property (nonatomic, strong) NSNumber *gyroscopeZ;
 
 @property (nonatomic, strong) NSNumber *arm;
+@property (nonatomic, strong) NSNumber *XDirection;
 @property (nonatomic, strong) NSNumber *pose;
 
 @property (weak) id pairedObserver;
@@ -59,6 +60,7 @@
 @dynamic outputGyroscopeZ;
 
 @dynamic outputArm;
+@dynamic outputXDirection;
 @dynamic outputPose;
 
 
@@ -114,6 +116,14 @@
 	{
 		return @{
 			QCPortAttributeNameKey: @"Arm",
+			QCPortAttributeTypeKey: QCPortTypeIndex,
+		};
+	}
+	
+	if([key isEqualToString:@"outputXDirection"])
+	{
+		return @{
+			QCPortAttributeNameKey: @"X-Direction",
 			QCPortAttributeTypeKey: QCPortTypeIndex,
 		};
 	}
@@ -210,6 +220,7 @@
 	if(success)
 	{
 		self.arm = @(MYOHubArmUnknown);
+		self.XDirection = @(MYOHubXDirectionUnknown);
 		
 		NSNotificationCenter *notificationCenter = NSNotificationCenter.defaultCenter;
 		
@@ -261,9 +272,16 @@
 				arm = @(MYOHubArmUnknown);
 			}
 			
+			NSNumber *XDirection = userInfo[MYOHubXDirectionKey];
+			if(XDirection == nil)
+			{
+				XDirection = @(MYOHubXDirectionUnknown);
+			}
+			
 			id<NSLocking> lock = self.lock;
 			[lock lock];
 			self.arm = arm;
+			self.XDirection = XDirection;
 			[lock unlock];
 		}];
 
@@ -372,6 +390,13 @@
 	{
 		self.outputArm = arm.unsignedIntegerValue;
 		self.arm = nil;
+	}
+	
+	NSNumber *XDirection = self.XDirection;
+	if(XDirection != nil)
+	{
+		self.outputXDirection = XDirection.unsignedIntegerValue;
+		self.XDirection = nil;
 	}
 	
 	// orientation

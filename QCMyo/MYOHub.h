@@ -25,6 +25,13 @@ typedef NS_ENUM(NSUInteger, MYOHubArm)
 	MYOHubArmUnknown = libmyo_arm_unknown,
 };
 
+typedef NS_ENUM(NSUInteger, MYOHubXDirection)
+{
+	MYOHubXDirectionTowardWrist = libmyo_x_direction_toward_wrist,
+	MYOHubXDirectionTowardElbow = libmyo_x_direction_toward_elbow,
+	MYOHubXDirectionUnknown = libmyo_x_direction_unknown,
+};
+
 typedef NS_ENUM(NSUInteger, MYOHubPose)
 {
 	MYOHubPoseRest = libmyo_pose_rest,
@@ -45,6 +52,8 @@ extern NSString * const MYOHubDidDisconnectMyoNotification;
 extern NSString * const MYOHubDidArmDidChangeNotification;
 
 extern NSString * const MYOHubArmKey;
+
+extern NSString * const MYOHubXDirectionKey;
 
 extern NSString * const MYOHubDidReceiveOrientationDataNotification;
 

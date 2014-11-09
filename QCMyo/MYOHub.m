@@ -13,6 +13,8 @@ NSString * const MYOHubDidArmDidChangeNotification = @"MYOHubDidArmDidChangeNoti
 
 NSString * const MYOHubArmKey = @"arm";
 
+NSString * const MYOHubXDirectionKey = @"XDirection";
+
 NSString * const MYOHubDidReceiveOrientationDataNotification = @"MYOHubDidReceiveOrientationDataNotification";
 
 NSString * const MYOHubDidRecognizePoseNotification = @"MYOHubDidRecognizePoseNotification";
@@ -233,9 +235,11 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 			case libmyo_event_arm_recognized:
 			{
 				libmyo_arm_t arm = libmyo_event_get_arm(event);
+				libmyo_x_direction_t XDirection = libmyo_event_get_x_direction(event);
 				
 				NSDictionary *userInfo = @{
 					MYOHubArmKey: @(arm),
+					MYOHubXDirectionKey: @(XDirection),
 				};
 
 				dispatch_async(dispatch_get_main_queue(), ^{
@@ -249,6 +253,7 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 			{
 				NSDictionary *userInfo = @{
 					MYOHubArmKey: @(MYOHubArmUnknown),
+					MYOHubXDirectionKey: @(MYOHubXDirectionUnknown),
 				};
 				
 				dispatch_async(dispatch_get_main_queue(), ^{
