@@ -29,4 +29,6 @@
 @property (assign) NSString *outputPoseName;
 @property (assign) NSUInteger outputPoseIndex;
 
+@property (assign) double outputRSSI;
+
 @end

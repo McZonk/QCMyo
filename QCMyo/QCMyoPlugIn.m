@@ -32,6 +32,8 @@
 @property (nonatomic, strong) NSString *poseName;
 @property (nonatomic, strong) NSNumber *poseIndex;
 
+@property (nonatomic, strong) NSNumber *RSSI;
+
 @property (weak) id pairedObserver;
 @property (weak) id unpairedObserver;
 @property (weak) id connectedObserver;
@@ -39,6 +41,7 @@
 @property (weak) id orientationObserver;
 @property (weak) id armObserver;
 @property (weak) id poseObserver;
+@property (weak) id RSSIObserver;
 
 @end
 
@@ -70,6 +73,8 @@
 
 @dynamic outputPoseName;
 @dynamic outputPoseIndex;
+
+@dynamic outputRSSI;
 
 
 + (NSDictionary *)attributes
@@ -199,6 +204,13 @@
 	if([key isEqualToString:@"outputPoseIndex"])
 	{
 		return @{ QCPortAttributeNameKey: @"Pose Index" };
+	}
+	
+	// RSSI
+	
+	if([key isEqualToString:@"outputRSSI"])
+	{
+		return @{ QCPortAttributeNameKey: @"RSSI" };
 	}
 
 	return nil;
@@ -333,6 +345,19 @@
 			[lock lock];
 			self.poseName = poseName;
 			self.poseIndex = poseIndex;
+			[lock unlock];
+		}];
+		
+		self.RSSIObserver = [notificationCenter addObserverForName:MYOHubDidReceiveRSSINotification object:hub queue:nil usingBlock:^(NSNotification *notification) {
+			typeof(self) self = weakSelf;
+
+			NSDictionary *userInfo = notification.userInfo;
+			
+			NSNumber *RSSI = userInfo[MYOHubRSSIKey];
+			
+			id<NSLocking> lock = self.lock;
+			[lock lock];
+			self.RSSI = RSSI;
 			[lock unlock];
 		}];
 	}
@@ -516,6 +541,15 @@
 	{
 		self.outputPoseIndex = poseIndex.unsignedIntegerValue;
 		self.poseIndex = nil;
+	}
+	
+	// RSSI
+	
+	NSNumber *RSSI = self.RSSI;
+	if(RSSI != nil)
+	{
+		self.outputRSSI = RSSI.doubleValue;
+		self.RSSI = nil;
 	}
 	
 	[lock unlock];

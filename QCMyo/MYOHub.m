@@ -25,8 +25,6 @@ NSString * const MYOHubXDirectionIndexKey = @"XDirectionIndex";
 
 NSString * const MYOHubDidReceiveOrientationDataNotification = @"MYOHubDidReceiveOrientationDataNotification";
 
-NSString * const MYOHubDidRecognizePoseNotification = @"MYOHubDidRecognizePoseNotification";
-
 NSString * const MYOHubOrientationXKey = @"orientationX";
 NSString * const MYOHubOrientationYKey = @"orientationY";
 NSString * const MYOHubOrientationZKey = @"orientationZ";
@@ -40,6 +38,8 @@ NSString * const MYOHubGyroscopeDataXKey = @"gyroscopeX";
 NSString * const MYOHubGyroscopeDataYKey = @"gyroscopeY";
 NSString * const MYOHubGyroscopeDataZKey = @"gyroscopeZ";
 
+NSString * const MYOHubDidRecognizePoseNotification = @"MYOHubDidRecognizePoseNotification";
+
 NSString * const MYOHubPoseNameKey = @"poseName";
 
 NSString * const MYOHubPoseValueRest = @"rest";
@@ -50,6 +50,10 @@ NSString * const MYOHubPoseValueFingersSpread = @"fingers spread";
 NSString * const MYOHubPoseValueThumbToPinky = @"thumb to pinky";
 
 NSString * const MYOHubPoseIndexKey = @"poseIndex";
+
+NSString * const MYOHubDidReceiveRSSINotification = @"MYOHubDidReceiveRSSINotification";
+
+NSString * const MYOHubRSSIKey = @"RSSI";
 
 
 @interface MYOHub ()
@@ -126,14 +130,21 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 			}
 			
 			dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+				const unsigned int timestep = 100;
+				
 				while(!self.stopRunning)
 				{
 					libmyo_error_details_t error = NULL;
-					libmyo_result_t result = libmyo_run(hub, 20, MyoHandler, (__bridge void *)self, &error);
+					libmyo_result_t result = libmyo_run(hub, timestep, MyoHandler, (__bridge void *)self, &error);
 					if(result != libmyo_success)
 					{
 						NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
 						libmyo_free_error_details(error), error = NULL;
+					}
+					
+					if(myo != NULL)
+					{
+						libmyo_request_rssi(myo, NULL);
 					}
 				}
 				
@@ -359,6 +370,21 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 				
 				dispatch_async(dispatch_get_main_queue(), ^{
 					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidRecognizePoseNotification object:self userInfo:userInfo];
+				});
+				
+				break;
+			}
+				
+			case libmyo_event_rssi:
+			{
+				uint8_t RSSI = libmyo_event_get_rssi(event);
+				
+				NSDictionary *userInfo = @{
+					MYOHubRSSIKey: @(RSSI),
+				};
+				
+				dispatch_async(dispatch_get_main_queue(), ^{
+					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidReceiveRSSINotification object:self userInfo:userInfo];
 				});
 				
 				break;
