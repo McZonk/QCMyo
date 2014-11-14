@@ -11,6 +11,11 @@
 @property (nonatomic, strong) NSNumber *paired;
 @property (nonatomic, strong) NSNumber *connected;
 
+@property (nonatomic, strong) NSString *armName;
+@property (nonatomic, strong) NSNumber *armIndex;
+@property (nonatomic, strong) NSString *XDirectionName;
+@property (nonatomic, strong) NSNumber *XDirectionIndex;
+
 @property (nonatomic, strong) NSNumber *orientationX;
 @property (nonatomic, strong) NSNumber *orientationY;
 @property (nonatomic, strong) NSNumber *orientationZ;
@@ -24,9 +29,8 @@
 @property (nonatomic, strong) NSNumber *gyroscopeY;
 @property (nonatomic, strong) NSNumber *gyroscopeZ;
 
-@property (nonatomic, strong) NSNumber *arm;
-@property (nonatomic, strong) NSNumber *XDirection;
-@property (nonatomic, strong) NSNumber *pose;
+@property (nonatomic, strong) NSString *poseName;
+@property (nonatomic, strong) NSNumber *poseIndex;
 
 @property (weak) id pairedObserver;
 @property (weak) id unpairedObserver;
@@ -46,6 +50,11 @@
 @dynamic outputPaired;
 @dynamic outputConnected;
 
+@dynamic outputArmName;
+@dynamic outputArmIndex;
+@dynamic outputXDirectionName;
+@dynamic outputXDirectionIndex;
+
 @dynamic outputOrientationX;
 @dynamic outputOrientationY;
 @dynamic outputOrientationZ;
@@ -59,9 +68,8 @@
 @dynamic outputGyroscopeY;
 @dynamic outputGyroscopeZ;
 
-@dynamic outputArm;
-@dynamic outputXDirection;
-@dynamic outputPose;
+@dynamic outputPoseName;
+@dynamic outputPoseIndex;
 
 
 + (NSDictionary *)attributes
@@ -112,22 +120,26 @@
 	
 	// arm
 	
-	if([key isEqualToString:@"outputArm"])
+	if([key isEqualToString:@"outputArmName"])
 	{
-		return @{
-			QCPortAttributeNameKey: @"Arm",
-			QCPortAttributeTypeKey: QCPortTypeIndex,
-		};
+		return @{ QCPortAttributeNameKey: @"Arm Name" };
 	}
 	
-	if([key isEqualToString:@"outputXDirection"])
+	if([key isEqualToString:@"outputArmIndex"])
 	{
-		return @{
-			QCPortAttributeNameKey: @"X-Direction",
-			QCPortAttributeTypeKey: QCPortTypeIndex,
-		};
+		return @{ QCPortAttributeNameKey: @"Arm Index" };
 	}
 	
+	if([key isEqualToString:@"outputXDirectionName"])
+	{
+		return @{ QCPortAttributeNameKey: @"X-Direction Name" };
+	}
+
+	if([key isEqualToString:@"outputXDirectionIndex"])
+	{
+		return @{ QCPortAttributeNameKey: @"X-Direction Index" };
+	}
+
 	// orientation
 	
 	if([key isEqualToString:@"outputOrientationX"])
@@ -179,12 +191,14 @@
 	
 	// pose
 	
-	if([key isEqualToString:@"outputPose"])
+	if([key isEqualToString:@"outputPoseName"])
 	{
-		return @{
-			QCPortAttributeNameKey: @"Pose",
-			QCPortAttributeTypeKey: QCPortTypeIndex,
-		};
+		return @{ QCPortAttributeNameKey: @"Pose Name" };
+	}
+	
+	if([key isEqualToString:@"outputPoseIndex"])
+	{
+		return @{ QCPortAttributeNameKey: @"Pose Index" };
 	}
 
 	return nil;
@@ -219,9 +233,6 @@
 	BOOL success = [hub setupWithError:nil];
 	if(success)
 	{
-		self.arm = @(MYOHubArmUnknown);
-		self.XDirection = @(MYOHubXDirectionUnknown);
-		
 		NSNotificationCenter *notificationCenter = NSNotificationCenter.defaultCenter;
 		
 		__weak typeof(self) weakSelf = self;
@@ -266,22 +277,22 @@
 
 			NSDictionary *userInfo = notification.userInfo;
 			
-			NSNumber *arm = userInfo[MYOHubArmKey];
-			if(arm == nil)
+			NSString *armName = userInfo[MYOHubArmNameKey];
+			if(armName == nil)
 			{
-				arm = @(MYOHubArmUnknown);
+				armName = @"";
 			}
 			
-			NSNumber *XDirection = userInfo[MYOHubXDirectionKey];
-			if(XDirection == nil)
+			NSString *XDirectionName = userInfo[MYOHubXDirectionNameKey];
+			if(XDirectionName == nil)
 			{
-				XDirection = @(MYOHubXDirectionUnknown);
+				XDirectionName = @"";
 			}
 			
 			id<NSLocking> lock = self.lock;
 			[lock lock];
-			self.arm = arm;
-			self.XDirection = XDirection;
+			self.armName = armName;
+			self.XDirectionName = XDirectionName;
 			[lock unlock];
 		}];
 
@@ -310,9 +321,18 @@
 
 			NSDictionary *userInfo = notification.userInfo;
 			
+			NSString *poseName = userInfo[MYOHubPoseNameKey];
+			if(poseName == nil)
+			{
+				poseName = @"";
+			}
+			
+			NSNumber *poseIndex = userInfo[MYOHubPoseIndexKey];
+			
 			id<NSLocking> lock = self.lock;
 			[lock lock];
-			self.pose = userInfo[MYOHubPoseKey];
+			self.poseName = poseName;
+			self.poseIndex = poseIndex;
 			[lock unlock];
 		}];
 	}
@@ -385,18 +405,32 @@
 	
 	// arm
 	
-	NSNumber *arm = self.arm;
-	if(arm != nil)
+	NSString *armName = self.armName;
+	if(armName != nil)
 	{
-		self.outputArm = arm.unsignedIntegerValue;
-		self.arm = nil;
+		self.outputArmName = armName;
+		self.armName = nil;
 	}
 	
-	NSNumber *XDirection = self.XDirection;
-	if(XDirection != nil)
+	NSNumber *armIndex = self.armIndex;
+	if(armIndex != nil)
 	{
-		self.outputXDirection = XDirection.unsignedIntegerValue;
-		self.XDirection = nil;
+		self.outputArmIndex = armIndex.unsignedIntegerValue;
+		self.armIndex = nil;
+	}
+	
+	NSString *XDirectionName = self.XDirectionName;
+	if(XDirectionName != nil)
+	{
+		self.outputXDirectionName = XDirectionName;
+		self.XDirectionName = nil;
+	}
+	
+	NSNumber *XDirectionIndex = self.XDirectionIndex;
+	if(XDirectionIndex != nil)
+	{
+		self.outputXDirectionIndex = XDirectionIndex.unsignedIntegerValue;
+		self.XDirectionIndex = nil;
 	}
 	
 	// orientation
@@ -470,11 +504,18 @@
 	
 	// pose
 	
-	NSNumber *pose = self.pose;
-	if(pose != nil)
+	NSString *poseName = self.poseName;
+	if(poseName != nil)
 	{
-		self.outputPose = pose.unsignedIntegerValue;
-		self.pose = nil;
+		self.outputPoseName = poseName;
+		self.poseName = nil;
+	}
+	
+	NSNumber *poseIndex = self.poseIndex;
+	if(poseIndex != nil)
+	{
+		self.outputPoseIndex = poseIndex.unsignedIntegerValue;
+		self.poseIndex = nil;
 	}
 	
 	[lock unlock];

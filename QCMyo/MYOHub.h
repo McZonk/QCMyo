@@ -18,30 +18,6 @@ typedef NS_ENUM(NSUInteger, MYOHubVibrationType)
 	MYOHubVibrationTypeLong = libmyo_vibration_long,
 };
 
-typedef NS_ENUM(NSUInteger, MYOHubArm)
-{
-	MYOHubArmRight = libmyo_arm_right,
-	MYOHubArmLeft = libmyo_arm_left,
-	MYOHubArmUnknown = libmyo_arm_unknown,
-};
-
-typedef NS_ENUM(NSUInteger, MYOHubXDirection)
-{
-	MYOHubXDirectionTowardWrist = libmyo_x_direction_toward_wrist,
-	MYOHubXDirectionTowardElbow = libmyo_x_direction_toward_elbow,
-	MYOHubXDirectionUnknown = libmyo_x_direction_unknown,
-};
-
-typedef NS_ENUM(NSUInteger, MYOHubPose)
-{
-	MYOHubPoseRest = libmyo_pose_rest,
-	MYOHubPoseFist = libmyo_pose_fist,
-	MYOHubPoseWaveIn = libmyo_pose_wave_in,
-	MYOHubPoseWaveOut = libmyo_pose_wave_out,
-	MYOHubPoseFingersSpread = libmyo_pose_fingers_spread,
-	MYOHubPoseThumbToPinky = libmyo_pose_thumb_to_pinky,
-};
-
 
 extern NSString * const MYOHubDidPairNotification;
 extern NSString * const MYOHubDidUnpairNotification;
@@ -51,9 +27,17 @@ extern NSString * const MYOHubDidDisconnectMyoNotification;
 
 extern NSString * const MYOHubDidArmDidChangeNotification;
 
-extern NSString * const MYOHubArmKey;
+extern NSString * const MYOHubArmNameKey;
+extern NSString * const MYOHubArmNameValueRight;
+extern NSString * const MYOHubArmNameValueLeft;
 
-extern NSString * const MYOHubXDirectionKey;
+extern NSString * const MYOHubArmIndexKey;
+
+extern NSString * const MYOHubXDirectionNameKey;
+extern NSString * const MYOHubXDirectionNameValueTowardsWrist;
+extern NSString * const MYOHubXDirectionNameValueTowardsElbow;
+
+extern NSString * const MYOHubXDirectionIndexKey;
 
 extern NSString * const MYOHubDidReceiveOrientationDataNotification;
 
@@ -72,7 +56,16 @@ extern NSString * const MYOHubGyroscopeDataZKey;
 
 extern NSString * const MYOHubDidRecognizePoseNotification;
 
-extern NSString * const MYOHubPoseKey;
+extern NSString * const MYOHubPoseNameKey;
+
+extern NSString * const MYOHubPoseIndexKey;
+
+extern NSString * const MYOHubPoseValueRest;
+extern NSString * const MYOHubPoseValueFist;
+extern NSString * const MYOHubPoseValueWaveIn;
+extern NSString * const MYOHubPoseValueWaveOut;
+extern NSString * const MYOHubPoseValueFingersSpread;
+extern NSString * const MYOHubPoseValueThumbToPinky;
 
 
 @interface MYOHub : NSObject

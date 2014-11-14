@@ -8,6 +8,11 @@
 @property (assign) BOOL outputPaired;
 @property (assign) BOOL outputConnected;
 
+@property (assign) NSString *outputArmName;
+@property (assign) NSUInteger outputArmIndex;
+@property (assign) NSString *outputXDirectionName;
+@property (assign) NSUInteger outputXDirectionIndex;
+
 @property (assign) double outputOrientationX;
 @property (assign) double outputOrientationY;
 @property (assign) double outputOrientationZ;
@@ -21,8 +26,7 @@
 @property (assign) double outputGyroscopeY;
 @property (assign) double outputGyroscopeZ;
 
-@property (assign) NSUInteger outputArm;
-@property (assign) NSUInteger outputXDirection;
-@property (assign) NSUInteger outputPose;
+@property (assign) NSString *outputPoseName;
+@property (assign) NSUInteger outputPoseIndex;
 
 @end

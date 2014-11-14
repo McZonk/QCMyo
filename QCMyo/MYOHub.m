@@ -11,9 +11,17 @@ NSString * const MYOHubDidDisconnectMyoNotification = @"MYOHubDidDisconnectMyoNo
 
 NSString * const MYOHubDidArmDidChangeNotification = @"MYOHubDidArmDidChangeNotification";
 
-NSString * const MYOHubArmKey = @"arm";
+NSString * const MYOHubArmNameKey = @"armName";
+NSString * const MYOHubArmNameValueRight = @"right";
+NSString * const MYOHubArmNameValueLeft = @"left";
 
-NSString * const MYOHubXDirectionKey = @"XDirection";
+NSString * const MYOHubArmIndexKey = @"armIndex";
+
+NSString * const MYOHubXDirectionNameKey = @"XDirectionName";
+NSString * const MYOHubXDirectionNameValueTowardsWrist = @"wrist";
+NSString * const MYOHubXDirectionNameValueTowardsElbow = @"elbow";
+
+NSString * const MYOHubXDirectionIndexKey = @"XDirectionIndex";
 
 NSString * const MYOHubDidReceiveOrientationDataNotification = @"MYOHubDidReceiveOrientationDataNotification";
 
@@ -32,9 +40,16 @@ NSString * const MYOHubGyroscopeDataXKey = @"gyroscopeX";
 NSString * const MYOHubGyroscopeDataYKey = @"gyroscopeY";
 NSString * const MYOHubGyroscopeDataZKey = @"gyroscopeZ";
 
-NSString * const MYOHubPoseKey = @"Pose";
+NSString * const MYOHubPoseNameKey = @"poseName";
 
+NSString * const MYOHubPoseValueRest = @"rest";
+NSString * const MYOHubPoseValueFist = @"fist";
+NSString * const MYOHubPoseValueWaveIn = @"wave in";
+NSString * const MYOHubPoseValueWaveOut = @"wave out";
+NSString * const MYOHubPoseValueFingersSpread = @"fingers spread";
+NSString * const MYOHubPoseValueThumbToPinky = @"thumb to pinky";
 
+NSString * const MYOHubPoseIndexKey = @"poseIndex";
 
 
 @interface MYOHub ()
@@ -234,14 +249,32 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 				
 			case libmyo_event_arm_recognized:
 			{
-				libmyo_arm_t arm = libmyo_event_get_arm(event);
-				libmyo_x_direction_t XDirection = libmyo_event_get_x_direction(event);
+				NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
 				
-				NSDictionary *userInfo = @{
-					MYOHubArmKey: @(arm),
-					MYOHubXDirectionKey: @(XDirection),
-				};
+				libmyo_arm_t arm = libmyo_event_get_arm(event);
+				userInfo[MYOHubArmIndexKey] = @(arm);
+				
+				if(arm == libmyo_arm_right)
+				{
+					userInfo[MYOHubArmNameKey] = MYOHubArmNameValueRight;
+				}
+				else if(arm == libmyo_arm_left)
+				{
+					userInfo[MYOHubArmNameKey] = MYOHubArmNameValueLeft;
+				}
+				
+				libmyo_x_direction_t XDirection = libmyo_event_get_x_direction(event);
+				userInfo[MYOHubXDirectionIndexKey] = @(XDirection);
 
+				if(XDirection == libmyo_x_direction_toward_elbow)
+				{
+					userInfo[MYOHubXDirectionNameKey] = MYOHubXDirectionNameValueTowardsElbow;
+				}
+				else if(XDirection == libmyo_x_direction_toward_wrist)
+				{
+					userInfo[MYOHubXDirectionNameKey] = MYOHubXDirectionNameValueTowardsWrist;
+				}
+				
 				dispatch_async(dispatch_get_main_queue(), ^{
 					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidArmDidChangeNotification object:self userInfo:userInfo];
 				});
@@ -251,13 +284,8 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 				
 			case libmyo_event_arm_lost:
 			{
-				NSDictionary *userInfo = @{
-					MYOHubArmKey: @(MYOHubArmUnknown),
-					MYOHubXDirectionKey: @(MYOHubXDirectionUnknown),
-				};
-				
 				dispatch_async(dispatch_get_main_queue(), ^{
-					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidArmDidChangeNotification object:self userInfo:userInfo];
+					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidArmDidChangeNotification object:self userInfo:nil];
 				});
 				
 				break;
@@ -299,12 +327,37 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 				
 			case libmyo_event_pose:
 			{
+				NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
+
 				libmyo_pose_t pose = libmyo_event_get_pose(event);
+				userInfo[MYOHubPoseIndexKey] = @(pose);
+				
+				if(pose == libmyo_pose_rest)
+				{
+					userInfo[MYOHubPoseNameKey] = MYOHubPoseValueRest;
+				}
+				else if(pose == libmyo_pose_fist)
+				{
+					userInfo[MYOHubPoseNameKey] = MYOHubPoseValueFist;
+				}
+				else if(pose == libmyo_pose_wave_in)
+				{
+					userInfo[MYOHubPoseNameKey] = MYOHubPoseValueWaveIn;
+				}
+				else if(pose == libmyo_pose_wave_out)
+				{
+					userInfo[MYOHubPoseNameKey] = MYOHubPoseValueWaveOut;
+				}
+				else if(pose == libmyo_pose_fingers_spread)
+				{
+					userInfo[MYOHubPoseNameKey] = MYOHubPoseValueFingersSpread;
+				}
+				else if(pose == libmyo_pose_thumb_to_pinky)
+				{
+					userInfo[MYOHubPoseNameKey] = MYOHubPoseValueThumbToPinky;
+				}
 				
 				dispatch_async(dispatch_get_main_queue(), ^{
-					NSDictionary *userInfo = @{
-						MYOHubPoseKey: @(pose),
-					};
 					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidRecognizePoseNotification object:self userInfo:userInfo];
 				});
 				
