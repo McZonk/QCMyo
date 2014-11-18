@@ -195,7 +195,7 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 	return success;
 }
 
-- (void)vibrateWithType:(MYOHubVibrationType)vibration
+- (void)vibrateWithType:(NSUInteger)vibration
 {
 	dispatch_async(queue, ^{
 		if(myo != NULL)
@@ -258,7 +258,7 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 				break;
 			}
 				
-			case libmyo_event_arm_recognized:
+			case libmyo_event_arm_synced:
 			{
 				NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
 				
@@ -293,7 +293,7 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 				break;
 			}
 				
-			case libmyo_event_arm_lost:
+			case libmyo_event_arm_unsynced:
 			{
 				dispatch_async(dispatch_get_main_queue(), ^{
 					[NSNotificationCenter.defaultCenter postNotificationName:MYOHubDidArmDidChangeNotification object:self userInfo:nil];

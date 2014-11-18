@@ -409,8 +409,11 @@
 	
 	if([self didValueForInputKeyChange:@"inputVibration"])
 	{
-		MYOHubVibrationType vibrationType = self.inputVibration - 1;
-		[self.hub vibrateWithType:vibrationType];
+		NSUInteger vibrationType = self.inputVibration;
+		if(vibrationType > 0)
+		{
+			[self.hub vibrateWithType:vibrationType - 1];
+		}
 	}
 	
 	// status

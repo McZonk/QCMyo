@@ -11,14 +11,6 @@
 #import <myo/libmyo.h>
 
 
-typedef NS_ENUM(NSUInteger, MYOHubVibrationType)
-{
-	MYOHubVibrationTypeShort = libmyo_vibration_short,
-	MYOHubVibrationTypeMedium = libmyo_vibration_medium,
-	MYOHubVibrationTypeLong = libmyo_vibration_long,
-};
-
-
 extern NSString * const MYOHubDidPairNotification;
 extern NSString * const MYOHubDidUnpairNotification;
 
@@ -79,6 +71,6 @@ extern NSString * const MYOHubRSSIKey;
 - (BOOL)setupWithError:(NSError **)error;
 - (BOOL)shutdown;
 
-- (void)vibrateWithType:(MYOHubVibrationType)vibration;
+- (void)vibrateWithType:(NSUInteger)vibration;
 
 @end
