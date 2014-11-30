@@ -1,5 +1,5 @@
 #include "BuildNumber.xcconfig"
 
-QCMYO_VERSION=0.6
+QCMYO_VERSION=1.0
 
-CODE_SIGN_IDENTITY = Mac Developer
+CODE_SIGN_IDENTITY=Mac Developer

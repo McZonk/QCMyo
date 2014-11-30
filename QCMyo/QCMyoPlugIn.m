@@ -88,8 +88,10 @@
 			@"Source/Device",
 		],
 		QCPlugInAttributeExamplesKey: @[
-			[NSURL URLWithString:@"http://developer.thalmic.com/"],
-			[NSURL URLWithString:@"https://github.com/McZonk/QCMyo/"],
+			@"Myo.qtz",
+			// QC crashes when string and URLs keys present :(
+//			[NSURL URLWithString:@"http://developer.thalmic.com/"],
+//			[NSURL URLWithString:@"https://github.com/McZonk/QCMyo/"],
 		],
 	};
 }
