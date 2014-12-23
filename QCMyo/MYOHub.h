@@ -57,7 +57,7 @@ extern NSString * const MYOHubPoseValueFist;
 extern NSString * const MYOHubPoseValueWaveIn;
 extern NSString * const MYOHubPoseValueWaveOut;
 extern NSString * const MYOHubPoseValueFingersSpread;
-extern NSString * const MYOHubPoseValueThumbToPinky;
+extern NSString * const MYOHubPoseValueDoubleTap;
 
 extern NSString * const MYOHubDidReceiveRSSINotification;
 

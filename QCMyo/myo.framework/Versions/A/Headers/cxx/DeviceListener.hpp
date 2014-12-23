@@ -60,6 +60,12 @@ public:
     /// Called when a paired Myo is moved or removed from the arm.
     virtual void onArmUnsync(Myo* myo, uint64_t timestamp) {}
 
+    /// Called when a paired Myo becomes unlocked.
+    virtual void onUnlock(Myo* myo, uint64_t timestamp) {}
+
+    /// Called when a paired Myo becomes locked.
+    virtual void onLock(Myo* myo, uint64_t timestamp) {}
+
     /// Called when a paired Myo has provided a new pose.
     virtual void onPose(Myo* myo, uint64_t timestamp, Pose pose) {}
 
@@ -75,6 +81,10 @@ public:
     /// Called when a paired Myo has provided a new RSSI value.
     /// @see Myo::requestRssi() to request an RSSI value from the Myo.
     virtual void onRssi(Myo* myo, uint64_t timestamp, int8_t rssi) {}
+
+    /// Called when a paired Myo has provided new EMG data.
+    /// \a emg is an array of 8 elements, each corresponding to one sensor.
+    virtual void onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* emg) {}
 
     /// @cond LIBMYO_INTERNALS
 

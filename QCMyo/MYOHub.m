@@ -47,7 +47,7 @@ NSString * const MYOHubPoseValueFist = @"fist";
 NSString * const MYOHubPoseValueWaveIn = @"wave in";
 NSString * const MYOHubPoseValueWaveOut = @"wave out";
 NSString * const MYOHubPoseValueFingersSpread = @"fingers spread";
-NSString * const MYOHubPoseValueThumbToPinky = @"thumb to pinky";
+NSString * const MYOHubPoseValueDoubleTap = @"double tap";
 
 NSString * const MYOHubPoseIndexKey = @"poseIndex";
 
@@ -122,6 +122,14 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 		{
 			libmyo_error_details_t error = NULL;
 			libmyo_result_t result = libmyo_init_hub(&hub, "de.mczonk.QCMyo", &error);
+			if(result != libmyo_success)
+			{
+				NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
+				libmyo_free_error_details(error), error = NULL;
+				return;
+			}
+
+			result = libmyo_set_locking_policy(hub, libmyo_locking_policy_none, &error);
 			if(result != libmyo_success)
 			{
 				NSLog(@"%s:%d:ERROR %d %s", __FUNCTION__, __LINE__, result, libmyo_error_cstring(error));
@@ -363,9 +371,9 @@ static libmyo_handler_result_t MyoHandler(void* userData, libmyo_event_t event)
 				{
 					userInfo[MYOHubPoseNameKey] = MYOHubPoseValueFingersSpread;
 				}
-				else if(pose == libmyo_pose_thumb_to_pinky)
+				else if(pose == libmyo_pose_double_tap)
 				{
-					userInfo[MYOHubPoseNameKey] = MYOHubPoseValueThumbToPinky;
+					userInfo[MYOHubPoseNameKey] = MYOHubPoseValueDoubleTap;
 				}
 				
 				dispatch_async(dispatch_get_main_queue(), ^{
