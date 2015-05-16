@@ -11,3 +11,8 @@ Features:
 
 Copy the *QCMyo.plugin* to *~/Graphics/Quartz Composer Plug-Ins*.
 The `Myo.qtz` contains a sample how to use the Myo inside of Quartz Composer.
+
+Tested with:
+- Mac OS X SDK 0.8.1
+- Firmware 1.3.1448
+- Myo Connect 0.13.0
